@@ -1,0 +1,19 @@
+# Inherit checks from the chosen clang-format style if desired (can help consistency)
+InheritParentConfig: true
+
+# Specify checks to run. Use wildcards. '-' prefix disables.
+# Start broad, then disable specifics if needed.
+Checks: >
+  -* # Disable everything by default
+  ,bugprone-*              # Enable potential bug detections
+  ,performance-*          # Enable performance hints
+  ,readability-*          # Enable readability improvements
+  ,modernize-*            # Enable C++ modernization suggestions
+  ,google-*               # Enable checks from Google style guide (optional)
+  ,google-build-using-namespace # Example: Disable a specific check if noisy
+  ,modernize-use-trailing-return-type # Another example
+  ,readability-identifier-length # Can be annoying
+
+# Specify which headers to analyze. Usually only your own project's headers.
+# Adjust the regex based on your project structure (e.g., 'src/.*', 'include/.*')
+HeaderFilterRegex: "^(?:src|include)/.*"
