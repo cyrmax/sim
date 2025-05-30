@@ -4,6 +4,7 @@
 #include "speech.h"
 
 #include <spdlog/spdlog.h>
+#include <string>
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
     m_panel = new wxPanel(this, wxID_ANY);
@@ -26,8 +27,13 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 
 void MainFrame::populateVoicesList() {
     m_voicesList->Clear();
-    m_voicesList->AppendString("Voice number one");
-    m_voicesList->AppendString("Voice number zwei!");
+    auto voices = Speech::GetInstance().getVoicesList();
+    if (voices.empty()) {
+        m_voicesList->AppendString("No voices available");
+    }
+    for (const auto& [i, voiceName] : voices) {
+        m_voicesList->AppendString(std::string(voiceName));
+    }
     m_voicesList->SetSelection(0);
 }
 
@@ -46,6 +52,6 @@ bool MyApp::OnInit() {
     }
     MainFrame* frame = new MainFrame("SIM test");
     frame->Show(true);
-    spdlog::debug("Main windo shown");
+    spdlog::debug("Main window shown");
     return true;
 }

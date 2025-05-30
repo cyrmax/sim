@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.35)
+cmake_minimum_required(VERSION 3.25)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(VCPKG_TARGET_TRIPLET x64-windows-static)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -14,7 +15,7 @@ endif()
 project(sim VERSION 0.1)
 
 if(MSVC)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL" CACHE STRING "MSVC Runtime Library" FORCE)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "MSVC Runtime Library" FORCE)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -66,7 +67,8 @@ FetchContent_Declare(spdlog
 GIT_REPOSITORY https://github.com/gabime/spdlog.git
 GIT_TAG v1.15.3
 )
-target_compile_definitions(sim PUBLIC SPDLOG_COMPILED_LIB)
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Build spdlog as a static library" FORCE) # Ensure spdlog itself is a static lib
+target_compile_definitions(sim PUBLIC SPDLOG_COMPILED_LIB) # This tells your code spdlog is a compiled lib
 FetchContent_MakeAvailable(spdlog)
 
 # Find and connect wxwidgets
@@ -88,4 +90,4 @@ target_include_directories(sim PRIVATE
 "${wxWidgets_INCLUDE_DIRS}"
 )
 
-target_link_libraries(sim PRIVATE miniaudio SRAL_static spdlog::spdlog ${wxWidgets_LIBRARIES})
+target_link_libraries(sim PRIVATE miniaudio SRAL_static spdlog ${wxWidgets_LIBRARIES})
