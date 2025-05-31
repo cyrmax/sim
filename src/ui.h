@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wx/event.h>
 #include <wx/wx.h>
 
 class MainFrame : public wxFrame {
@@ -18,6 +19,7 @@ class MainFrame : public wxFrame {
     void OnVoiceChange(wxCommandEvent& event);
     void OnOutputDeviceChange(wxCommandEvent& event);
     void OnRefresh(wxCommandEvent& event);
+    void OnCharEvent(wxKeyEvent& event);
 };
 
 class MyApp : public wxApp {

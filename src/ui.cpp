@@ -20,7 +20,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     mainSizer->Add(selectionsSizer);
     m_messageField->SetFocus();
     m_panel->SetSizer(mainSizer);
-    Layout();
+    this->Bind(wxEVT_CHAR_HOOK, &MainFrame::OnCharEvent, this);
     populateVoicesList();
     populateDevicesList();
 }
@@ -44,6 +44,14 @@ void MainFrame::populateDevicesList() {
     m_outputDevicesList->AppendString("Default device");
     m_outputDevicesList->AppendString("Some other device");
     m_outputDevicesList->SetSelection(0);
+}
+
+void MainFrame::OnCharEvent(wxKeyEvent& event) {
+    if (event.GetKeyCode() == WXK_ESCAPE) {
+        Close();
+    } else {
+        event.Skip();
+    }
 }
 
 bool MyApp::OnInit() {
