@@ -7,11 +7,15 @@
 class Speech {
   public:
     static Speech& GetInstance();
+    // Prevent copying and moving
+    Speech(const Speech&) = delete;
+    Speech& operator=(const Speech&) = delete;
+    Speech(Speech&&) = delete;
+    Speech& operator=(Speech&&) = delete;
 
     std::vector<std::string> getVoicesList();
 
   private:
-    static Speech* sharedInstance;
     Speech();
     ~Speech();
 };

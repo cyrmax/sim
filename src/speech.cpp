@@ -2,9 +2,6 @@
 
 #include <climits>
 #include <spdlog/spdlog.h>
-#include <vector>
-
-Speech* Speech::sharedInstance = nullptr;
 
 Speech::Speech() {
     spdlog::debug("SRAL instance initializing");
@@ -23,10 +20,8 @@ Speech::~Speech() {
 }
 
 Speech& Speech::GetInstance() {
-    if (!sharedInstance) {
-        sharedInstance = new Speech();
-    }
-    return *sharedInstance;
+    static Speech instance;
+    return instance;
 }
 
 std::vector<std::string> Speech::getVoicesList() {
