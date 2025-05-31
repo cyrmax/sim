@@ -28,11 +28,13 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 void MainFrame::populateVoicesList() {
     m_voicesList->Clear();
     auto voices = Speech::GetInstance().getVoicesList();
+    spdlog::trace("Got {} voices from Speech class", voices.size());
     if (voices.empty()) {
         m_voicesList->AppendString("No voices available");
     }
-    for (const auto& [i, voiceName] : voices) {
-        m_voicesList->AppendString(std::string(voiceName));
+    for (const auto& voiceName : voices) {
+        spdlog::trace("Appending voice with name {}", voiceName);
+        m_voicesList->AppendString(wxString::FromUTF8(voiceName));
     }
     m_voicesList->SetSelection(0);
 }

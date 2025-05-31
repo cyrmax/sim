@@ -29,11 +29,15 @@ Speech& Speech::GetInstance() {
     return *sharedInstance;
 }
 
-std::map<uint64_t, std::string_view> Speech::getVoicesList() {
+std::vector<std::string> Speech::getVoicesList() {
+    spdlog::trace("Getting SAPI voice list");
     auto voiceCount = SRAL_GetVoiceCountEx(SRAL_Engines::ENGINE_SAPI);
-    std::map<uint64_t, std::string_view> voices;
+    spdlog::trace("SRAL reports {} voices", voiceCount);
+    std::vector<std::string> voices;
+    voices.reserve(voiceCount);
     for (size_t i = 0; i < voiceCount; ++i) {
-        voices[i] = SRAL_GetVoiceNameEx(SRAL_Engines::ENGINE_SAPI, i);
+        voices.push_back(SRAL_GetVoiceNameEx(SRAL_Engines::ENGINE_SAPI, i));
+        spdlog::trace("Got voice number {}: name {}", i, voices[i]);
     }
     return voices;
 }
