@@ -14,6 +14,10 @@ class Speech {
     Speech& operator=(Speech&&) = delete;
 
     std::vector<std::string> getVoicesList();
+    bool speak(const char* text);
+    bool setRate(uint64_t rate);
+    bool setVolume(uint64_t volume);
+    bool setVoice(uint64_t idx);
 
   private:
     Speech();

@@ -36,3 +36,23 @@ std::vector<std::string> Speech::getVoicesList() {
     }
     return voices;
 }
+
+bool Speech::speak(const char* text) {
+    spdlog::trace("Speaking text: {}", text);
+    return SRAL_SpeakEx(SRAL_Engines::ENGINE_SAPI, text, true);
+}
+
+bool Speech::setRate(uint64_t rate) {
+    spdlog::trace("Setting rate to {}", rate);
+    return SRAL_SetRateEx(ENGINE_SAPI, rate);
+}
+
+bool Speech::setVolume(uint64_t volume) {
+    spdlog::trace("Setting volume to {}", volume);
+    return SRAL_SetVolumeEx(ENGINE_SAPI, volume);
+}
+
+bool Speech::setVoice(uint64_t idx) {
+    spdlog::trace("Setting voice ID to {}", idx);
+    return SRAL_SetVoiceEx(SRAL_Engines::ENGINE_SAPI, idx);
+}
