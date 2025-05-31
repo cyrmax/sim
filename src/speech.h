@@ -22,4 +22,7 @@ class Speech {
   private:
     Speech();
     ~Speech();
+
+    int m_defaultRate;
+    int m_defaultVolume;
 };

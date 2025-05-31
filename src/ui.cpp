@@ -18,7 +18,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     m_rateSlider =
         new wxSlider(m_panel, wxID_ANY, 0, -10, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     m_volumeSlider =
-        new wxSlider(m_panel, wxID_ANY, 100, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+        new wxSlider(m_panel, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
     selectionsSizer->Add(m_voicesList);
     selectionsSizer->Add(m_outputDevicesList);
     settingsSizer->Add(m_rateSlider);

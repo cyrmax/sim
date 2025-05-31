@@ -1,14 +1,20 @@
 #include "speech.h"
 
 #include <climits>
+#include <memory>
 #include <spdlog/spdlog.h>
+
+static constexpr size_t SRAL_MAX_VOICE_NAME_LEN = 128;
 
 Speech::Speech() {
     spdlog::debug("SRAL instance initializing");
     if (!SRAL_IsInitialized()) {
-        SRAL_Initialize(SRAL_Engines::ENGINE_NVDA | SRAL_Engines::ENGINE_JAWS | SRAL_Engines::ENGINE_UIA);
+        SRAL_Initialize(SRAL_ENGINE_NVDA | SRAL_ENGINE_JAWS | SRAL_ENGINE_UIA);
         spdlog::debug("SRAL initialized");
     }
+    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &m_defaultRate);
+    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_VOLUME, &m_defaultVolume);
+    spdlog::debug("Default speech rate: {}; default speech volume: {}", m_defaultRate, m_defaultVolume);
 }
 
 Speech::~Speech() {
@@ -26,33 +32,49 @@ Speech& Speech::GetInstance() {
 
 std::vector<std::string> Speech::getVoicesList() {
     spdlog::trace("Getting SAPI voice list");
-    auto voiceCount = SRAL_GetVoiceCountEx(SRAL_Engines::ENGINE_SAPI);
+    int voiceCount = 0;
+    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_COUNT, &voiceCount);
     spdlog::trace("SRAL reports {} voices", voiceCount);
     std::vector<std::string> voices;
+    std::vector<char*> c_voice_names_ptrs(voiceCount);
+    std::vector<std::unique_ptr<char[]>> voiceNameBuffers;
+    voiceNameBuffers.reserve(voiceCount);
+    for (size_t i = 0; i < voiceCount; ++i) {
+        auto buffer = std::make_unique<char[]>(SRAL_MAX_VOICE_NAME_LEN);
+        buffer[0] = '\0';
+        c_voice_names_ptrs[i] = buffer.get();
+        voiceNameBuffers.push_back(std::move(buffer));
+    }
+    if (!SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_LIST, c_voice_names_ptrs.data())) {
+        return voices;
+    }
     voices.reserve(voiceCount);
     for (size_t i = 0; i < voiceCount; ++i) {
-        voices.push_back(SRAL_GetVoiceNameEx(SRAL_Engines::ENGINE_SAPI, i));
-        spdlog::trace("Got voice number {}: name {}", i, voices[i]);
+        voices.emplace_back(c_voice_names_ptrs[i]);
     }
     return voices;
 }
 
 bool Speech::speak(const char* text) {
     spdlog::trace("Speaking text: {}", text);
-    return SRAL_SpeakEx(SRAL_Engines::ENGINE_SAPI, text, true);
+    return SRAL_SpeakEx(SRAL_ENGINE_SAPI, text, true);
 }
 
 bool Speech::setRate(uint64_t rate) {
     spdlog::trace("Setting rate to {}", rate);
-    return SRAL_SetRateEx(ENGINE_SAPI, rate);
+    return SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &rate);
 }
 
 bool Speech::setVolume(uint64_t volume) {
     spdlog::trace("Setting volume to {}", volume);
-    return SRAL_SetVolumeEx(ENGINE_SAPI, volume);
+    return SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_VOLUME, &volume);
 }
 
 bool Speech::setVoice(uint64_t idx) {
     spdlog::trace("Setting voice ID to {}", idx);
-    return SRAL_SetVoiceEx(SRAL_Engines::ENGINE_SAPI, idx);
+    if (!SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_INDEX, &idx)) {
+        spdlog::error("Failed to set voice index to {}", idx);
+        return false;
+    }
+    return true;
 }

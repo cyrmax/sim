@@ -57,7 +57,7 @@ FetchContent_MakeAvailable(miniaudio)
 # SRAL
 FetchContent_Declare(SRAL
 GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-GIT_TAG 0.3-Stable
+GIT_TAG "6d6b038"
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
 FetchContent_MakeAvailable(SRAL)
@@ -82,7 +82,7 @@ set(wxUSE_MEDIACTRL OFF CACHE BOOL "Disable media control if not needed")
 set(wxUSE_WEBVIEW OFF CACHE BOOL "Disable webview if not needed")
 set(wxUSE_RICHTEXT OFF CACHE BOOL "Disable rich text if not needed")
 
-find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
+find_package(wxWidgets REQUIRED core base)
 include(${wxWidgets_USE_FILE})
 
 target_include_directories(sim PRIVATE
