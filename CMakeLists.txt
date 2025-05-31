@@ -57,7 +57,7 @@ FetchContent_MakeAvailable(miniaudio)
 # SRAL
 FetchContent_Declare(SRAL
 GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-GIT_TAG "6d6b038"
+GIT_TAG "ad7a7fc"
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
 FetchContent_MakeAvailable(SRAL)

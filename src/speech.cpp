@@ -57,7 +57,11 @@ std::vector<std::string> Speech::getVoicesList() {
 
 bool Speech::speak(const char* text) {
     spdlog::trace("Speaking text: {}", text);
-    return SRAL_SpeakEx(SRAL_ENGINE_SAPI, text, true);
+    if (!SRAL_SpeakEx(SRAL_ENGINE_SAPI, text, true)) {
+        spdlog::error("Error speaking");
+        return false;
+    }
+    return true;
 }
 
 bool Speech::setRate(uint64_t rate) {
@@ -76,5 +80,8 @@ bool Speech::setVoice(uint64_t idx) {
         spdlog::error("Failed to set voice index to {}", idx);
         return false;
     }
+    int newIdx = 0;
+    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_INDEX, &newIdx);
+    spdlog::trace("After set the new voice number is {}", newIdx);
     return true;
 }
