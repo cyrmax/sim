@@ -1,5 +1,6 @@
 #include "ui.h"
 
+#include "audio.h"
 #include "loggerSetup.h"
 #include "speech.h"
 
@@ -53,8 +54,15 @@ void MainFrame::populateVoicesList() {
 
 void MainFrame::populateDevicesList() {
     m_outputDevicesList->Clear();
-    m_outputDevicesList->AppendString("Default device");
-    m_outputDevicesList->AppendString("Some other device");
+    auto devices = g_Audio.getDevicesList();
+    if (devices.empty()) {
+        m_outputDevicesList->AppendString("No devices");
+        return;
+    }
+    for (const auto& device : devices) {
+        auto isDefaultStr = device.isDefault ? "default" : "";
+        m_outputDevicesList->AppendString(std::format("[{}] {}", isDefaultStr, device.name));
+    }
     m_outputDevicesList->SetSelection(0);
 }
 
