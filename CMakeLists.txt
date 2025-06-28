@@ -40,6 +40,7 @@ file(MAKE_DIRECTORY ${FETCHCONTENT_BASE_DIR})
 FetchContent_Declare(miniaudio
 GIT_REPOSITORY https://github.com/mackron/miniaudio.git
 GIT_TAG 0.11.22
+GIT_SHALLOW ON
 )
 # Configure miniaudio build options
 set(MINIAUDIO_NO_LIBVORBIS ON CACHE BOOL "Disable libvorbis as we don't use it")
@@ -57,7 +58,8 @@ FetchContent_MakeAvailable(miniaudio)
 # SRAL
 FetchContent_Declare(SRAL
 GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-GIT_TAG "2ad533d"
+GIT_TAG "f1aa26d"
+GIT_SHALLOW ON
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
 FetchContent_MakeAvailable(SRAL)
@@ -66,6 +68,7 @@ FetchContent_MakeAvailable(SRAL)
 FetchContent_Declare(spdlog
 GIT_REPOSITORY https://github.com/gabime/spdlog.git
 GIT_TAG v1.15.3
+GIT_SHALLOW ON
 )
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "Build spdlog as a static library" FORCE) # Ensure spdlog itself is a static lib
 target_compile_definitions(sim PUBLIC SPDLOG_COMPILED_LIB) # This tells your code spdlog is a compiled lib

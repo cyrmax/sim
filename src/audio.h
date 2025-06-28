@@ -2,6 +2,7 @@
 
 #include "singleton.h"
 
+#include <climits>
 #include <memory>
 #include <miniaudio.h>
 #include <stdexcept>
@@ -66,6 +67,11 @@ class Audio {
     ~Audio() = default;
 
     std::vector<DeviceInfo> getDevicesList();
+    void selectDevice(size_t deviceIndex);
+
+  private:
+    ma_device_id m_lastDeviceID;
+    std::vector<DeviceInfo> m_lastDevicesList;
 };
 
 #define g_Audio CSingleton<Audio>::GetInstance()

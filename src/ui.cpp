@@ -60,8 +60,8 @@ void MainFrame::populateDevicesList() {
         return;
     }
     for (const auto& device : devices) {
-        auto isDefaultStr = device.isDefault ? "default" : "";
-        m_outputDevicesList->AppendString(std::format("[{}] {}", isDefaultStr, device.name));
+        auto isDefaultStr = device.isDefault ? "[default]" : "";
+        m_outputDevicesList->AppendString(std::format("{} {}", isDefaultStr, device.name));
     }
     m_outputDevicesList->SetSelection(0);
 }
@@ -81,6 +81,11 @@ void MainFrame::OnEnterPress(wxCommandEvent& event) {
 void MainFrame::OnVoiceChange(wxCommandEvent& event) {
     int value = m_voicesList->GetSelection();
     Speech::GetInstance().setVoice(value);
+}
+
+void MainFrame::OnOutputDeviceChange(wxCommandEvent& event) {
+    int value = m_outputDevicesList->GetSelection();
+    g_Audio.selectDevice(value);
 }
 
 void MainFrame::OnCharEvent(wxKeyEvent& event) {

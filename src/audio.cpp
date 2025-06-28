@@ -1,5 +1,7 @@
 #include "audio.h"
 
+#include <algorithm>
+
 std::vector<DeviceInfo> Audio::getDevicesList() {
     std::vector<DeviceInfo> deviceInfos;
     ma_device_info* pDeviceInfos;
@@ -13,5 +15,12 @@ std::vector<DeviceInfo> Audio::getDevicesList() {
         deviceInfos.push_back(
             DeviceInfo(pDeviceInfos[i].id, pDeviceInfos[i].name, pDeviceInfos[i].isDefault == MA_TRUE));
     }
-    return deviceInfos;
+    m_lastDevicesList = deviceInfos;
+    std::sort(m_lastDevicesList.begin(), m_lastDevicesList.end(),
+              [](const DeviceInfo& first, const DeviceInfo& second) { return first.isDefault > second.isDefault; });
+    return m_lastDevicesList;
+}
+
+void Audio::selectDevice(size_t deviceIndex) {
+    m_lastDeviceID = m_lastDevicesList[deviceIndex].id;
 }
