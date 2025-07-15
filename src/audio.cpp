@@ -46,7 +46,14 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
         ma_audio_buffer_uninit(&pPayload->audioBuffer);
         return false;
     }
-    // ma_sound_set_end_callback(&pPayload->sound, soundEndCallback, pPayload);
     ma_sound_start(&pPayload->sound);
     return true;
+}
+
+float Audio::getVolume() {
+    return ma_engine_get_volume(g_AudioEngine);
+}
+
+void Audio::setVolume(const float volume) {
+    ma_engine_set_volume(g_AudioEngine, volume);
 }

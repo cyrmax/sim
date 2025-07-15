@@ -15,8 +15,7 @@ Speech::Speech() {
         spdlog::debug("SRAL initialized");
     }
     SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &m_defaultRate);
-    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_VOLUME, &m_defaultVolume);
-    spdlog::debug("Default speech rate: {}; default speech volume: {}", m_defaultRate, m_defaultVolume);
+    spdlog::debug("Default speech rate: {}; default speech volume: {}", m_defaultRate, g_Audio.getVolume());
 }
 
 Speech::~Speech() {
@@ -70,11 +69,6 @@ bool Speech::speak(const char* text) {
 bool Speech::setRate(uint64_t rate) {
     spdlog::trace("Setting rate to {}", rate);
     return SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &rate);
-}
-
-bool Speech::setVolume(uint64_t volume) {
-    spdlog::trace("Setting volume to {}", volume);
-    return SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_VOLUME, &volume);
 }
 
 bool Speech::setVoice(uint64_t idx) {

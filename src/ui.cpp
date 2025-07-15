@@ -18,8 +18,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     m_outputDevicesList = new wxListBox(m_panel, wxID_ANY);
     m_rateSlider =
         new wxSlider(m_panel, wxID_ANY, 0, -10, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    m_volumeSlider =
-        new wxSlider(m_panel, wxID_ANY, 50, 0, 100, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
+    m_volumeSlider = new wxSlider(m_panel, wxID_ANY, 50, 0, 100);
     selectionsSizer->Add(m_voicesList);
     selectionsSizer->Add(m_outputDevicesList);
     settingsSizer->Add(m_rateSlider);
@@ -71,7 +70,7 @@ void MainFrame::OnRateSliderChange(wxCommandEvent& event) {
 }
 
 void MainFrame::OnVolumeSliderChange(wxCommandEvent& event) {
-    Speech::GetInstance().setVolume(m_volumeSlider->GetValue());
+    g_Audio.setVolume(m_volumeSlider->GetValue() / 100.0f);
 }
 
 void MainFrame::OnEnterPress(wxCommandEvent& event) {

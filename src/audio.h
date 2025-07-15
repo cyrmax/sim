@@ -104,6 +104,8 @@ class Audio {
     void selectDevice(size_t deviceIndex);
     bool playAudioData(const int channels, const int sampleRate, const int bitsPerSample, const uint64_t bufferSize,
                        const void* buffer);
+    float getVolume();
+    void setVolume(const float volume);
 
   private:
     std::unique_ptr<CDevice> m_device;
