@@ -30,7 +30,7 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
                           const void* buffer) {
     updateDevice();
     const ma_uint64 frameCount = bufferSize / (channels * bitsPerSample / 8);
-    auto pPayload = new SoundPayload();
+    auto* pPayload = new SoundPayload();
     auto config = ma_audio_buffer_config_init(determineFormat(bitsPerSample), channels, frameCount, buffer, nullptr);
     config.sampleRate = sampleRate;
     ma_result result = ma_audio_buffer_init(&config, &pPayload->audioBuffer);
@@ -38,9 +38,9 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
         spdlog::critical("Failed to initialize audio buffer");
         return false;
     }
-    result = ma_sound_init_from_data_source(g_AudioEngine, &pPayload->audioBuffer,
-                                            MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION, nullptr,
-                                            &pPayload->sound);
+    result = ma_sound_init_from_data_source(
+        g_AudioEngine, &pPayload->audioBuffer,
+        MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_ASYNC, nullptr, &pPayload->sound);
     if (result != MA_SUCCESS) {
         spdlog::critical("Failed to initialize sound instance");
         ma_audio_buffer_uninit(&pPayload->audioBuffer);
