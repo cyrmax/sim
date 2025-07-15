@@ -46,7 +46,7 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
         ma_audio_buffer_uninit(&pPayload->audioBuffer);
         return false;
     }
+    // ma_sound_set_end_callback(&pPayload->sound, soundEndCallback, pPayload);
     ma_sound_start(&pPayload->sound);
-    ma_sound_set_end_callback(&pPayload->sound, soundEndCallback, pPayload);
     return true;
 }

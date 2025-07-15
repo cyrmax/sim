@@ -122,6 +122,7 @@ class Audio {
     }
 
     static void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, const ma_uint32 frameCount) {
+        spdlog::trace("Audio data callback called");
         auto engine = (ma_engine*)pDevice->pUserData;
         if (engine == nullptr) {
             return;

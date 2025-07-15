@@ -1,3 +1,6 @@
+# Ignore that strange test.txt file generated when using some synthesizers
+test.txt
+
 # build folder
 build/
 
