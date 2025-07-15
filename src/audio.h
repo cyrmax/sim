@@ -61,17 +61,62 @@ class CAudioEngine {
 
 #define g_AudioEngine CSingleton<CAudioEngine>::GetInstance()
 
+class CDevice {
+  public:
+    CDevice(ma_device_id* deviceID, ma_device_data_proc dataCallback) : device(nullptr) {
+        device = std::make_unique<ma_device>();
+        ma_device_config config = ma_device_config_init(ma_device_type_playback);
+        config.playback.pDeviceID = deviceID;
+        config.dataCallback = dataCallback;
+        config.pUserData = g_AudioEngine;
+        ma_result result = ma_device_init(g_AudioContext, &config, &*device);
+        if (result != MA_SUCCESS) {
+            throw std::exception();
+        }
+    }
+
+    ~CDevice() {
+        ma_device_uninit(&*device);
+        device.reset();
+    }
+
+    operator ma_device*() { return &*device; }
+
+  private:
+    std::unique_ptr<ma_device> device;
+};
+
 class Audio {
   public:
-    Audio() = default;
+    Audio() : m_device(nullptr) { m_selectedDeviceID = getDevicesList()[0].id; }
     ~Audio() = default;
 
     std::vector<DeviceInfo> getDevicesList();
     void selectDevice(size_t deviceIndex);
+    void playAudioData();
 
   private:
-    ma_device_id m_lastDeviceID;
+    std::unique_ptr<CDevice> m_device;
+    ma_device_id m_selectedDeviceID;
+    ma_device_id m_currentDeviceID;
     std::vector<DeviceInfo> m_lastDevicesList;
+
+    void updateDevice() {
+        if (ma_device_id_equal(&m_currentDeviceID, &m_selectedDeviceID)) {
+            return;
+        }
+        m_device = std::make_unique<CDevice>(&m_selectedDeviceID, &Audio::audioDataCallback);
+        ma_device_start(*m_device);
+        m_currentDeviceID = m_selectedDeviceID;
+    }
+
+    static void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, const ma_uint32 frameCount) {
+        auto engine = (ma_engine*)pDevice->pUserData;
+        if (engine == nullptr) {
+            return;
+        }
+        ma_engine_read_pcm_frames(engine, pOutput, frameCount, nullptr);
+    }
 };
 
 #define g_Audio CSingleton<Audio>::GetInstance()

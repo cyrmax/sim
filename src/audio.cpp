@@ -22,5 +22,9 @@ std::vector<DeviceInfo> Audio::getDevicesList() {
 }
 
 void Audio::selectDevice(size_t deviceIndex) {
-    m_lastDeviceID = m_lastDevicesList[deviceIndex].id;
+    m_selectedDeviceID = m_lastDevicesList[deviceIndex].id;
+}
+
+void Audio::playAudioData() {
+    updateDevice();
 }

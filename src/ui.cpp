@@ -34,6 +34,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     m_volumeSlider->Bind(wxEVT_SLIDER, &MainFrame::OnVolumeSliderChange, this);
     m_messageField->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterPress, this);
     m_voicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnVoiceChange, this);
+    m_outputDevicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnOutputDeviceChange, this);
     populateVoicesList();
     populateDevicesList();
 }
