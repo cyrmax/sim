@@ -1,5 +1,7 @@
 #include "speech.h"
 
+#include "audio.h"
+
 #include <climits>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -57,10 +59,12 @@ std::vector<std::string> Speech::getVoicesList() {
 
 bool Speech::speak(const char* text) {
     spdlog::trace("Speaking text: {}", text);
-    if (!SRAL_SpeakEx(SRAL_ENGINE_SAPI, text, true)) {
-        spdlog::error("Error speaking");
-        return false;
-    }
+    uint64_t bufferSize;
+    int channels;
+    int sampleRate;
+    int bitsPerSample;
+    auto* data = SRAL_SpeakToMemoryEx(SRAL_ENGINE_SAPI, text, &bufferSize, &channels, &sampleRate, &bitsPerSample);
+    g_Audio.playAudioData(channels, sampleRate, bitsPerSample, bufferSize, data);
     return true;
 }
 

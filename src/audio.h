@@ -93,7 +93,8 @@ class Audio {
 
     std::vector<DeviceInfo> getDevicesList();
     void selectDevice(size_t deviceIndex);
-    void playAudioData();
+    bool playAudioData(const int channels, const int sampleRate, const int bitsPerSample, const uint64_t bufferSize,
+                       const void* buffer);
 
   private:
     std::unique_ptr<CDevice> m_device;
@@ -117,6 +118,33 @@ class Audio {
         }
         ma_engine_read_pcm_frames(engine, pOutput, frameCount, nullptr);
     }
+
+    struct SoundPayload {
+        ma_sound sound;
+        ma_audio_buffer audioBuffer;
+    };
+
+    static void soundEndCallback(void* pUserData, ma_sound* pSound) {
+        auto payload = (SoundPayload*)pUserData;
+        ma_sound_uninit(pSound);
+        ma_audio_buffer_uninit(&payload->audioBuffer);
+        delete payload;
+    }
 };
 
 #define g_Audio CSingleton<Audio>::GetInstance()
+
+inline ma_format determineFormat(int bitsPerSample) {
+    switch (bitsPerSample) {
+        case 8:
+            return ma_format_u8;
+        case 16:
+            return ma_format_s16; // Most common for speech
+        case 24:
+            return ma_format_s24;
+        case 32:
+            return ma_format_s32;
+        default:
+            return ma_format_unknown;
+    }
+}
