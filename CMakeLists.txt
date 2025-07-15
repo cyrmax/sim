@@ -62,6 +62,7 @@ GIT_TAG "f1aa26d"
 GIT_SHALLOW ON
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
+#target_compile_definitions(sim PUBLIC MA_DEBUG)
 FetchContent_MakeAvailable(SRAL)
 
 # spdlog

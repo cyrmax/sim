@@ -42,7 +42,6 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
 void MainFrame::populateVoicesList() {
     m_voicesList->Clear();
     auto voices = Speech::GetInstance().getVoicesList();
-    spdlog::trace("Got {} voices from Speech class", voices.size());
     if (voices.empty()) {
         m_voicesList->AppendString("No voices available");
     }

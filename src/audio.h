@@ -5,6 +5,7 @@
 #include <climits>
 #include <memory>
 #include <miniaudio.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <vector>
 
@@ -19,7 +20,9 @@ class CAudioContext {
   public:
     CAudioContext() : context(nullptr) {
         context = std::make_unique<ma_context>();
-        if (ma_context_init(nullptr, 0, nullptr, &*context) != MA_SUCCESS) {
+        ma_result result = ma_context_init(nullptr, 0, nullptr, &*context);
+        if (result != MA_SUCCESS) {
+            spdlog::error("Failed to initialize miniaudio context: {}", ma_result_description(result));
             throw std::exception("Failed to initialize miniaudio context");
         }
     }
@@ -43,7 +46,12 @@ class CAudioEngine {
         engine = std::make_unique<ma_engine>();
         ma_engine_config config = ma_engine_config_init();
         config.noDevice = MA_TRUE;
-        if (ma_engine_init(&config, &*engine) != MA_SUCCESS) {
+        config.channels = 2;
+        config.sampleRate = 48000;
+        config.pContext = g_AudioContext;
+        ma_result result = ma_engine_init(&config, &*engine);
+        if (result != MA_SUCCESS) {
+            spdlog::error("Failed to initialize miniaudio engine: {}", ma_result_description(result));
             throw std::exception("Failed to initialize miniaudio audio engine");
         }
     }
@@ -71,6 +79,7 @@ class CDevice {
         config.pUserData = g_AudioEngine;
         ma_result result = ma_device_init(g_AudioContext, &config, &*device);
         if (result != MA_SUCCESS) {
+            spdlog::error("Failed to initialize audio device: {}", ma_result_description(result));
             throw std::exception();
         }
     }
@@ -106,6 +115,7 @@ class Audio {
         if (ma_device_id_equal(&m_currentDeviceID, &m_selectedDeviceID)) {
             return;
         }
+        spdlog::trace("Initializing new audio device");
         m_device = std::make_unique<CDevice>(&m_selectedDeviceID, &Audio::audioDataCallback);
         ma_device_start(*m_device);
         m_currentDeviceID = m_selectedDeviceID;
@@ -125,6 +135,7 @@ class Audio {
     };
 
     static void soundEndCallback(void* pUserData, ma_sound* pSound) {
+        spdlog::trace("Sound end callback called");
         auto payload = (SoundPayload*)pUserData;
         ma_sound_uninit(pSound);
         ma_audio_buffer_uninit(&payload->audioBuffer);

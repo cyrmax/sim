@@ -8,6 +8,7 @@ std::vector<DeviceInfo> Audio::getDevicesList() {
     ma_uint32 deviceCount;
     ma_result result = ma_context_get_devices(g_AudioContext, &pDeviceInfos, &deviceCount, nullptr, nullptr);
     if (result != MA_SUCCESS) {
+        spdlog::critical("Failed to get list of devices");
         throw std::exception("Failed to get list of devices");
     }
     deviceInfos.reserve(deviceCount);
@@ -34,12 +35,14 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
     config.sampleRate = sampleRate;
     ma_result result = ma_audio_buffer_init(&config, &pPayload->audioBuffer);
     if (result != MA_SUCCESS) {
+        spdlog::critical("Failed to initialize audio buffer");
         return false;
     }
     result = ma_sound_init_from_data_source(g_AudioEngine, &pPayload->audioBuffer,
                                             MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION, nullptr,
                                             &pPayload->sound);
     if (result != MA_SUCCESS) {
+        spdlog::critical("Failed to initialize sound instance");
         ma_audio_buffer_uninit(&pPayload->audioBuffer);
         return false;
     }

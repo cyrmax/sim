@@ -33,10 +33,9 @@ Speech& Speech::GetInstance() {
 }
 
 std::vector<std::string> Speech::getVoicesList() {
-    spdlog::trace("Getting SAPI voice list");
     int voiceCount = 0;
     SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_COUNT, &voiceCount);
-    spdlog::trace("SRAL reports {} voices", voiceCount);
+    spdlog::debug("SRAL reports {} voices", voiceCount);
     std::vector<std::string> voices;
     std::vector<char*> c_voice_names_ptrs(voiceCount);
     std::vector<std::unique_ptr<char[]>> voiceNameBuffers;
@@ -86,6 +85,5 @@ bool Speech::setVoice(uint64_t idx) {
     }
     int newIdx = 0;
     SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_INDEX, &newIdx);
-    spdlog::trace("After set the new voice number is {}", newIdx);
     return true;
 }
