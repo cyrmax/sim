@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(VCPKG_TARGET_TRIPLET x64-windows-static)
 
@@ -29,6 +30,7 @@ add_executable(sim ${SIM_SOURCES})
 
 if(WIN32)
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+target_compile_definitions(sim PRIVATE _UNICODE=1)
 endif()
 
 # Dependencies with fetch content
@@ -58,7 +60,7 @@ FetchContent_MakeAvailable(miniaudio)
 # SRAL
 FetchContent_Declare(SRAL
 GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-GIT_TAG "f1aa26d"
+GIT_TAG "eefc635"
 GIT_SHALLOW ON
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
@@ -76,21 +78,51 @@ FetchContent_MakeAvailable(spdlog)
 
 # Find and connect wxwidgets
 set(wxBUILD_SHARED OFF)
-set(wxBUILD_COMPATIBILITY 3.1)
-set(wxBUILD_MONOLITHIC ON)
-set(wxBUILD_SAMPLES OFF CACHE BOOL "Don't build wxWidgets samples")
-set(wxBUILD_TESTS OFF CACHE BOOL "Don't build wxWidgets tests")
-set(wxBUILD_DEMOS OFF CACHE BOOL "Don't build wxWidgets demos")
+#set(wxBUILD_COMPATIBILITY 3.0)
+#set(wxBUILD_MONOLITHIC ON)
+#set(wxBUILD_SAMPLES OFF CACHE BOOL "Don't build wxWidgets samples")
+#set(wxBUILD_TESTS OFF CACHE BOOL "Don't build wxWidgets tests")
+#set(wxBUILD_DEMOS OFF CACHE BOOL "Don't build wxWidgets demos")
 set(wxUSE_MEDIACTRL OFF CACHE BOOL "Disable media control if not needed")
-set(wxUSE_WEBVIEW OFF CACHE BOOL "Disable webview if not needed")
-set(wxUSE_RICHTEXT OFF CACHE BOOL "Disable rich text if not needed")
+#set(wxUSE_WEBVIEW OFF CACHE BOOL "Disable webview if not needed")
+#set(wxUSE_RICHTEXT OFF CACHE BOOL "Disable rich text if not needed")
+#set(wxBUILD_PRECOMP OFF CACHE BOOL "Use precompiled headers")
+#set(wxBUILD_INSTALL OFF)
+#set(wxBUILD_OPTIMISE ON)
+#set(wxBUILD_STRIPPED_RELEASE ON)
+set(wxBUILD_VENDOR "Cyrmax")
+set(wxWidgets_USE_STATIC 1)
+set(wxUSE_XRC OFF)
+#target_compile_definitions(sim PRIVATE WXUSINGDLL=1)
 
-find_package(wxWidgets REQUIRED core base)
-include(${wxWidgets_USE_FILE})
+FetchContent_Declare(
+wxWidgets
+GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+GIT_TAG        v3.3.0
+GIT_SHALLOW     ON
+)
+FetchContent_GetProperties(wxWidgets)
+FetchContent_MakeAvailable(wxWidgets)
+
+#find_package(wxWidgets REQUIRED core base)
+#include(${wxWidgets_USE_FILE})
 
 target_include_directories(sim PRIVATE
 "${CMAKE_CURRENT_SOURCE_DIR}/src"
 "${wxWidgets_INCLUDE_DIRS}"
+"${wxwidgets_SOURCE_DIR}/include"
+"${wxwidgets_SOURCE_DIR}/include/msvc"
+"${wxwidgets_SOURCE_DIR}"
+"${wxwidgets_BINARY_DIR}"
+"${CMAKE_BINARY_DIR}/lib/vc_x64_lib/"
+"${CMAKE_CURRENT_SOURCE_DIR}/_dependencies/wxwidgets-build/lib/vc_x64_lib/mswud"
 )
 
-target_link_libraries(sim PRIVATE miniaudio SRAL_static spdlog ${wxWidgets_LIBRARIES})
+target_link_directories(sim PRIVATE
+"${CMAKE_BINARY_DIR}/lib/vc_x64_lib"
+"${CMAKE_BINARY_DIR}/lib/vc_x64_dll"
+"${wxwidgets_BINARY_DIR}/lib/vc_x64_dll"
+"${wxwidgets_BINARY_DIR}/lib/vc_x64_lib"
+)
+
+target_link_libraries(sim PRIVATE miniaudio SRAL_static spdlog wx::base wx::core)

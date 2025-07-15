@@ -1,7 +1,7 @@
 #pragma once
 
-#include <wx/event.h>
-#include <wx/wx.h>
+// #include <wx/wx.h>
+#include <wx/wxprec.h>
 
 class MainFrame : public wxFrame {
   public:
