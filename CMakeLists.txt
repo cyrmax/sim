@@ -12,7 +12,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project(sim VERSION 0.1)
+project(sim VERSION 1.0)
 
 if(MSVC)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "MSVC Runtime Library" FORCE)
@@ -62,7 +62,6 @@ GIT_TAG "f1aa26d"
 GIT_SHALLOW ON
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
-#target_compile_definitions(sim PUBLIC MA_DEBUG)
 FetchContent_MakeAvailable(SRAL)
 
 # spdlog
