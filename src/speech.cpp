@@ -33,24 +33,23 @@ Speech& Speech::GetInstance() {
 
 std::vector<std::string> Speech::getVoicesList() {
     int voiceCount = 0;
-    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_COUNT, &voiceCount);
+    if (!SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_COUNT, &voiceCount)) {
+        spdlog::error("Failed to get voice count from SRAL.");
+        return {}; // Return an empty vector on failure.
+    }
     spdlog::debug("SRAL reports {} voices", voiceCount);
+    if (voiceCount <= 0) {
+        return {};
+    }
+    std::vector<SRAL_VoiceInfo> voiceInfos(voiceCount);
+    if (!SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_PROPERTIES, voiceInfos.data())) {
+        spdlog::error("Failed to get voice properties from SRAL.");
+        return {};
+    }
     std::vector<std::string> voices;
-    std::vector<char*> c_voice_names_ptrs(voiceCount);
-    std::vector<std::unique_ptr<char[]>> voiceNameBuffers;
-    voiceNameBuffers.reserve(voiceCount);
-    for (size_t i = 0; i < voiceCount; ++i) {
-        auto buffer = std::make_unique<char[]>(SRAL_MAX_VOICE_NAME_LEN);
-        buffer[0] = '\0';
-        c_voice_names_ptrs[i] = buffer.get();
-        voiceNameBuffers.push_back(std::move(buffer));
-    }
-    if (!SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_LIST, c_voice_names_ptrs.data())) {
-        return voices;
-    }
     voices.reserve(voiceCount);
-    for (size_t i = 0; i < voiceCount; ++i) {
-        voices.emplace_back(c_voice_names_ptrs[i]);
+    for (const auto& info : voiceInfos) {
+        voices.emplace_back(info.name);
     }
     return voices;
 }

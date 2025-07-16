@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(VCPKG_TARGET_TRIPLET x64-windows-static)
 
@@ -52,15 +51,22 @@ set(MINIAUDIO_ENABLE_ONLY_SPECIFIC_BACKENDS ON CACHE BOOL "Disable all backends 
 # And enable the needed ones only
 set(MINIAUDIO_ENABLE_WASAPI ON CACHE BOOL "Enable wasapi backend")
 # Disable unused APIs
-set(MINIAUDIO_NO_ENCODING                   ON CACHE BOOL "Disable encoding")
+set(MINIAUDIO_NO_ENCODING                   OFF CACHE BOOL "Disable encoding")
 set(MINIAUDIO_NO_MP3                        ON CACHE BOOL "Disable mp3 as we will not use it")
-set(MINIAUDIO_NO_WAV ON CACHE BOOL "Disable wav as we use flac")
+set(MINIAUDIO_NO_WAV ON CACHE BOOL "Disable wav")
+# Disable other features
+set(MINIAUDIO_DEBUG_OUTPUT OFF CACHE BOOL "" FORCE) # switch to on in case of debug
+set(MINIAUDIO_NO_DECODING OFF CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_EXTRA_NODES ON CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_FLAC ON CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_GENERATION ON CACHE BOOL "" FORCE)
+set(MINIAUDIO_NO_NODE_GRAPH OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(miniaudio)
 
 # SRAL
 FetchContent_Declare(SRAL
 GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-GIT_TAG "eefc635"
+GIT_TAG "48440dd"
 GIT_SHALLOW ON
 )
 target_compile_definitions(sim PUBLIC SRAL_STATIC)
@@ -77,22 +83,37 @@ target_compile_definitions(sim PUBLIC SPDLOG_COMPILED_LIB) # This tells your cod
 FetchContent_MakeAvailable(spdlog)
 
 # Find and connect wxwidgets
-set(wxBUILD_SHARED OFF)
-#set(wxBUILD_COMPATIBILITY 3.0)
-#set(wxBUILD_MONOLITHIC ON)
-#set(wxBUILD_SAMPLES OFF CACHE BOOL "Don't build wxWidgets samples")
-#set(wxBUILD_TESTS OFF CACHE BOOL "Don't build wxWidgets tests")
-#set(wxBUILD_DEMOS OFF CACHE BOOL "Don't build wxWidgets demos")
-set(wxUSE_MEDIACTRL OFF CACHE BOOL "Disable media control if not needed")
-#set(wxUSE_WEBVIEW OFF CACHE BOOL "Disable webview if not needed")
-#set(wxUSE_RICHTEXT OFF CACHE BOOL "Disable rich text if not needed")
-#set(wxBUILD_PRECOMP OFF CACHE BOOL "Use precompiled headers")
-#set(wxBUILD_INSTALL OFF)
-#set(wxBUILD_OPTIMISE ON)
-#set(wxBUILD_STRIPPED_RELEASE ON)
-set(wxBUILD_VENDOR "Cyrmax")
-set(wxWidgets_USE_STATIC 1)
-set(wxUSE_XRC OFF)
+set(wxBUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(wxBUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(wxBUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(wxBUILD_DEMOS OFF CACHE BOOL "" FORCE)
+set(wxBUILD_INSTALL OFF CACHE BOOL "" FORCE)
+
+# Foundational features that are generally required and unsafe to disable
+set(wxUSE_INTL ON CACHE BOOL "Internationalization is required by wxbase" FORCE)
+set(wxUSE_XLOCALE ON CACHE BOOL "Required for C++ locale functions" FORCE)
+
+# Safe-to-disable features if you don't use them
+set(wxUSE_AUI OFF CACHE BOOL "" FORCE)
+set(wxUSE_HTML OFF CACHE BOOL "" FORCE)
+set(wxUSE_MEDIACTRL OFF CACHE BOOL "" FORCE)
+set(wxUSE_OPENGL OFF CACHE BOOL "" FORCE)
+set(wxUSE_PROPGRID OFF CACHE BOOL "" FORCE)
+set(wxUSE_QA OFF CACHE BOOL "" FORCE)
+set(wxUSE_RIBBON OFF CACHE BOOL "" FORCE)
+set(wxUSE_RICHTEXT OFF CACHE BOOL "" FORCE)
+set(wxUSE_STC OFF CACHE BOOL "" FORCE)
+set(wxUSE_WEBVIEW OFF CACHE BOOL "" FORCE)
+set(wxUSE_XRC OFF CACHE BOOL "" FORCE)
+set(wxUSE_WXHTML_HELP OFF CACHE BOOL "" FORCE)
+
+# Other options
+set(wxBUILD_OPTIMISE ON CACHE BOOL "" FORCE)
+set(wxBUILD_STRIPPED_RELEASE ON CACHE BOOL "" FORCE)
+set(wxWidgets_USE_STATIC ON CACHE BOOL "" FORCE)
+set(wxUSE_EXTENDED_RTTI OFF CACHE BOOL "" FORCE)
+set(wxUSE_NO_RTTI OFF CACHE BOOL "" FORCE)
+
 #target_compile_definitions(sim PRIVATE WXUSINGDLL=1)
 
 FetchContent_Declare(
