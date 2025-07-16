@@ -12,18 +12,48 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     auto* mainSizer = new wxBoxSizer(wxVERTICAL);
     auto* selectionsSizer = new wxBoxSizer(wxHORIZONTAL);
     auto* settingsSizer = new wxBoxSizer(wxVERTICAL);
+
+    auto* messageFieldLabel = new wxStaticText(m_panel, wxID_ANY, "Text to speak");
     m_messageField = new wxTextCtrl(m_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                     wxTE_DONTWRAP | wxTE_PROCESS_ENTER);
+
+    auto* voicesListLabel = new wxStaticText(m_panel, wxID_ANY, "Voice");
     m_voicesList = new wxListBox(m_panel, wxID_ANY);
+
+    auto* outputDevicesListLabel = new wxStaticText(m_panel, wxID_ANY, "Output device");
     m_outputDevicesList = new wxListBox(m_panel, wxID_ANY);
-    m_rateSlider =
-        new wxSlider(m_panel, wxID_ANY, 0, -10, 10, wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS);
-    m_volumeSlider = new wxSlider(m_panel, wxID_ANY, 50, 0, 100);
-    selectionsSizer->Add(m_voicesList);
-    selectionsSizer->Add(m_outputDevicesList);
-    settingsSizer->Add(m_rateSlider);
-    settingsSizer->Add(m_volumeSlider);
-    mainSizer->Add(m_messageField);
+
+    auto* rateSliderLabel = new wxStaticText(m_panel, wxID_ANY, "Speech rate");
+    m_rateSlider = new wxSlider(m_panel, wxID_ANY, 0, -10, 10);
+
+    auto* volumeSliderLabel = new wxStaticText(m_panel, wxID_ANY, "Output volume");
+    m_volumeSlider = new wxSlider(m_panel, wxID_ANY, 100, 0, 100);
+
+    auto* voicesListSizer = new wxBoxSizer(wxVERTICAL);
+    voicesListSizer->Add(voicesListLabel);
+    voicesListSizer->Add(m_voicesList);
+    selectionsSizer->Add(voicesListSizer);
+
+    auto* outputDevicesListSizer = new wxBoxSizer(wxVERTICAL);
+    outputDevicesListSizer->Add(outputDevicesListLabel);
+    outputDevicesListSizer->Add(m_outputDevicesList);
+    selectionsSizer->Add(outputDevicesListSizer);
+
+    auto* rateSliderSizer = new wxBoxSizer(wxHORIZONTAL);
+    rateSliderSizer->Add(rateSliderLabel);
+    rateSliderSizer->Add(m_rateSlider);
+    settingsSizer->Add(rateSliderSizer);
+
+    auto* volumeSliderSizer = new wxBoxSizer(wxHORIZONTAL);
+    volumeSliderSizer->Add(volumeSliderLabel);
+    volumeSliderSizer->Add(m_volumeSlider);
+    settingsSizer->Add(volumeSliderSizer);
+
+    auto* messageFieldSizer = new wxBoxSizer(wxHORIZONTAL);
+    messageFieldSizer->Add(messageFieldLabel);
+    messageFieldSizer->Add(m_messageField);
+    mainSizer->Add(messageFieldSizer);
+
     mainSizer->Add(selectionsSizer);
     mainSizer->Add(settingsSizer);
     m_messageField->SetFocus();
