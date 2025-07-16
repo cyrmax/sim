@@ -12,9 +12,9 @@ Features are marked with checkboxes to indicate if a feature is already implemen
 - [x] Select any audio device to output speech to it;
 - [x] Tune TTS rate and volume (volume is controlled by audio system, not the SAPI engine);
 - [ ] Exclude voices which are known to not work with the program (for example Hungarian Profivox or some older SAPI synthesizers);
-- [ ] Add UI labels;
-- [ ] Keep history of spoken phrases;
-- [ ] Clear input text field on enter press and successful speech;
+- [x] Add UI labels;
+- [x] Keep history of spoken phrases;
+- [x] Clear input text field on enter press and successful speech;
 - [ ] Accept command line arguments (to create a personalized shortcut with predefined settings);
 - [ ] Display more friendly and understandable SAPI voice names;
 - [ ] Modify audio system logic to avoid resampling artifacts;
