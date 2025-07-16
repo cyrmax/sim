@@ -18,6 +18,7 @@ class MainFrame : public wxFrame {
     void populateVoicesList();
     void populateDevicesList();
     void OnEnterPress(wxCommandEvent& event);
+    void OnMessageFieldKeyDown(wxKeyEvent& event);
     void OnVoiceChange(wxCommandEvent& event);
     void OnOutputDeviceChange(wxCommandEvent& event);
     void OnRateSliderChange(wxCommandEvent& event);

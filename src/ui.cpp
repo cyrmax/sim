@@ -1,6 +1,7 @@
 #include "ui.h"
 
 #include "audio.h"
+#include "historyStorage.h"
 #include "loggerSetup.h"
 #include "speech.h"
 
@@ -62,6 +63,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) 
     m_rateSlider->Bind(wxEVT_SLIDER, &MainFrame::OnRateSliderChange, this);
     m_volumeSlider->Bind(wxEVT_SLIDER, &MainFrame::OnVolumeSliderChange, this);
     m_messageField->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnEnterPress, this);
+    m_messageField->Bind(wxEVT_KEY_DOWN, &MainFrame::OnMessageFieldKeyDown, this);
     m_voicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnVoiceChange, this);
     m_outputDevicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnOutputDeviceChange, this);
     populateVoicesList();
@@ -104,8 +106,23 @@ void MainFrame::OnVolumeSliderChange(wxCommandEvent& event) {
 }
 
 void MainFrame::OnEnterPress(wxCommandEvent& event) {
-    Speech::GetInstance().speak(m_messageField->GetValue().ToUTF8().data());
+    auto text = m_messageField->GetValue();
+    Speech::GetInstance().speak(text.ToUTF8().data());
+    g_HistoryStorage.push(text.ToStdString());
     m_messageField->Clear();
+}
+
+void MainFrame::OnMessageFieldKeyDown(wxKeyEvent& event) {
+    auto text = m_messageField->GetValue().ToStdString();
+    switch (event.GetKeyCode()) {
+        case WXK_UP:
+            m_messageField->SetValue(g_HistoryStorage.getPreviousByText(text));
+            break;
+        case WXK_DOWN:
+            m_messageField->SetValue(g_HistoryStorage.getNextByText(text));
+            break;
+    }
+    event.Skip();
 }
 
 void MainFrame::OnVoiceChange(wxCommandEvent& event) {
