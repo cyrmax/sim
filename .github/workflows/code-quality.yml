@@ -30,10 +30,6 @@ jobs:
           clang-tidy --version
         shell: pwsh
 
-      # --- 1. FORMATTING CHECK ---
-      # We don't use the format.bat script here because we don't want to
-      # modify files in CI, we want to VERIFY they are already formatted.
-      # The '--dry-run --Werror' command is perfect for this.
       - name: Check code formatting for compliance
         run: |
           $files = Get-ChildItem -Path src -Recurse -Include *.cpp,*.h
@@ -46,10 +42,6 @@ jobs:
           arch: x64
 
       - name: Run clang-tidy
-        uses: HorstBaerbel/action-clang-tidy@1.2
-        with:
-          scandir: "."
-          builddir: "build/windows-msvc-x64-lint"
-          excludedirs: ""
-          extensions: "c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx"
-          cmakeoptions: "--preset windows-msvc-x64-lint"
+        shell: cmd
+        run: |
+          scripts\lint.bat
