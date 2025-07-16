@@ -1,0 +1,1 @@
+cmake --preset windows-msvc-x64-release && cmake --build --preset release-x64

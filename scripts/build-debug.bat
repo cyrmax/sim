@@ -1,0 +1,1 @@
+cmake --preset windows-msvc-x64-debug && cmake --build --preset debug-x64

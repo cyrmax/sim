@@ -22,46 +22,74 @@
       }
     },
     {
-      "name": "windows-msvc-debug",
+      "name": "windows-msvc-x64-debug",
       "displayName": "Windows MSVC x64 Debug",
-      "description": "Builds for Windows using MSVC (Debug) with Ninja.",
+      "description": "Builds for Windows (64-bit) using MSVC (Debug) with Ninja.",
       "inherits": "base-msvc",
       "architecture": {
         "value": "x64",
         "strategy": "external"
       },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
-      "name": "windows-msvc-release",
+      "name": "windows-msvc-x64-release",
       "displayName": "Windows MSVC x64 Release",
-      "description": "Builds for Windows using MSVC (Release) with Ninja.",
+      "description": "Builds for Windows (64-bit) using MSVC (Release) with Ninja.",
       "inherits": "base-msvc",
       "architecture": {
         "value": "x64",
         "strategy": "external"
       },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "MinSizeRel"
-      }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "MinSizeRel" }
+    },
+    {
+      "name": "windows-msvc-x86-debug",
+      "displayName": "Windows MSVC x86 Debug",
+      "description": "Builds for Windows (32-bit) using MSVC (Debug) with Ninja.",
+      "inherits": "base-msvc",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-msvc-x86-release",
+      "displayName": "Windows MSVC x86 Release",
+      "description": "Builds for Windows (32-bit) using MSVC (Release) with Ninja.",
+      "inherits": "base-msvc",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "MinSizeRel" }
     }
   ],
   "buildPresets": [
     {
-      "name": "debug",
-      "displayName": "Build (Debug)",
-      "configurePreset": "windows-msvc-debug",
-      "jobs": 0,
-      "description": "Builds the Debug configuration."
+      "name": "debug-x64",
+      "displayName": "Build x64 (Debug)",
+      "configurePreset": "windows-msvc-x64-debug",
+      "jobs": 0
     },
     {
-      "name": "release",
-      "displayName": "Build (Release)",
-      "configurePreset": "windows-msvc-release",
-      "jobs": 0,
-      "description": "Builds the Release configuration."
+      "name": "release-x64",
+      "displayName": "Build x64 (Release)",
+      "configurePreset": "windows-msvc-x64-release",
+      "jobs": 0
+    },
+    {
+      "name": "debug-x86",
+      "displayName": "Build x86 (Debug)",
+      "configurePreset": "windows-msvc-x86-debug",
+      "jobs": 0
+    },
+    {
+      "name": "release-x86",
+      "displayName": "Build x86 (Release)",
+      "configurePreset": "windows-msvc-x86-release",
+      "jobs": 0
     }
   ]
 }
