@@ -1,0 +1,55 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  code-quality:
+    name: Code Formatting & Linting Check
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Clang-Tools (LLVM)
+        run: choco install llvm --version=20.1.7 -y
+
+      - name: Add LLVM to PATH for subsequent steps
+        # This is a robust way to ensure the tools are found
+        run: echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Verify clang-tools installation
+        run: |
+          clang-format --version
+          clang-tidy --version
+        shell: pwsh
+
+      # --- 1. FORMATTING CHECK ---
+      # We don't use the format.bat script here because we don't want to
+      # modify files in CI, we want to VERIFY they are already formatted.
+      # The '--dry-run --Werror' command is perfect for this.
+      - name: Check code formatting for compliance
+        run: |
+          $files = Get-ChildItem -Path src -Recurse -Include *.cpp,*.h
+          clang-format --dry-run --Werror --style=file $files
+        shell: pwsh # Use PowerShell for Get-ChildItem
+
+      - name: Set up MSVC build environment for the script
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Run clang-tidy
+        uses: HorstBaerbel/action-clang-tidy@1.2
+        with:
+          scandir: "."
+          builddir: "build/windows-msvc-x64-lint"
+          excludedirs: ""
+          extensions: "c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx"
+          cmakeoptions: "--preset windows-msvc-x64-lint"

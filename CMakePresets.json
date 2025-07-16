@@ -64,6 +64,15 @@
         "strategy": "external"
       },
       "cacheVariables": { "CMAKE_BUILD_TYPE": "MinSizeRel" }
+    },
+    {
+      "name": "windows-msvc-x64-lint",
+      "displayName": "Windows MSVC x64 (for Linting)",
+      "description": "Configures the project for running static analysis with clang-tidy.",
+      "inherits": "windows-msvc-x64-debug",
+      "cacheVariables": {
+        "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT": "ProgramDatabase"
+      }
     }
   ],
   "buildPresets": [
