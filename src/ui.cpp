@@ -105,6 +105,7 @@ void MainFrame::OnVolumeSliderChange(wxCommandEvent& event) {
 
 void MainFrame::OnEnterPress(wxCommandEvent& event) {
     Speech::GetInstance().speak(m_messageField->GetValue().ToUTF8().data());
+    m_messageField->Clear();
 }
 
 void MainFrame::OnVoiceChange(wxCommandEvent& event) {
