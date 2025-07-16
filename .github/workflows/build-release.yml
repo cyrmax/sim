@@ -1,36 +1,95 @@
-name: build release
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers the workflow on tags starting with 'v', e.g., v1.0, v2.0-beta
 
 permissions:
   contents: write
 
-on:
-  push:
-    tags: ["*"]
-    # To build on main/master branch, uncomment the following line:
-    # branches: [ main , master ]
-
-  pull_request:
-    branches: [main, master]
-
-  workflow_dispatch:
-
 jobs:
-  build:
+  build-x64:
+    name: Build for Windows (x64)
     runs-on: windows-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: configure
-        run: cmake --preset windows-msvc-release -D CMAKE_C_COMPILER=clang-cl -D CMAKE_CXX_COMPILER=clang-cl
-
-      - name: build
-        run: cmake --build --preset release
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - name: Set up MSVC x64 build environment
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          token: ${{ github.token }}
-          files: build/windows-msvc-release/sim.exe
-          fail_on_unmatched_files: true
-          prerelease: ${{ contains(github.ref, '-') }}
+          arch: x64
+
+      - name: Configure CMake
+        run: cmake --preset=windows-msvc-x64-release
+
+      - name: Build project
+        run: cmake --build --preset=release-x64
+
+      - name: Rename binary for release
+        run: ren build\windows-msvc-x64-release\sim.exe sim-x64.exe
+
+      - name: Upload x64 binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-x64 # Explicit artifact name
+          path: build\windows-msvc-x64-release\sim-x64.exe # Explicit file path to upload
+
+  build-x86:
+    name: Build for Windows (x86)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC x86 build environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Configure CMake
+        run: cmake --preset=windows-msvc-x86-release
+
+      - name: Build project
+        run: cmake --build --preset=release-x86
+
+      - name: Rename binary for release
+        run: ren build\windows-msvc-x86-release\sim.exe sim-x86.exe
+
+      - name: Upload x86 binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-x86 # Explicit artifact name
+          path: build\windows-msvc-x86-release\sim-x86.exe # Explicit file path to upload
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-x64, build-x86] # Depends on both successful builds
+    runs-on: ubuntu-latest # ubuntu-latest is sufficient for creating the release
+    steps:
+      - name: Create a directory for binaries
+        run: mkdir release_binaries
+
+      - name: Download x64 binary
+        uses: actions/download-artifact@v4
+        with:
+          name: binary-x64
+          path: release_binaries # Explicit download directory. [2, 4, 5]
+
+      - name: Download x86 binary
+        uses: actions/download-artifact@v4
+        with:
+          name: binary-x86
+          path: release_binaries # Explicit download directory. [2, 4, 5]
+
+      - name: Create release and upload binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_binaries/sim-x64.exe
+            release_binaries/sim-x86.exe
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'rc')
