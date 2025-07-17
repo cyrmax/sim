@@ -106,6 +106,9 @@ void MainFrame::OnVolumeSliderChange(wxCommandEvent& event) {
 }
 
 void MainFrame::OnEnterPress(wxCommandEvent& event) {
+    if (m_messageField->IsEmpty()) {
+        return;
+    }
     auto text = m_messageField->GetValue();
     Speech::GetInstance().speak(text.ToUTF8().data());
     g_HistoryStorage.push(text.ToStdString());

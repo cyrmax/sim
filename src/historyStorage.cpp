@@ -3,6 +3,9 @@
 #include <algorithm>
 
 void HistoryStorage::push(const std::string& text) {
+    if (text.empty()) {
+        return;
+    }
     auto iter = std::find(m_messages.begin(), m_messages.end(), text);
     if (iter != m_messages.end()) {
         m_messages.erase(iter);
