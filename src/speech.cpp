@@ -49,7 +49,7 @@ std::vector<std::string> Speech::getVoicesList() {
     std::vector<std::string> voices;
     voices.reserve(voiceCount);
     for (const auto& info : voiceInfos) {
-        voices.emplace_back(info.name);
+        voices.emplace_back(std::format("{} - {}", (info.vendor == nullptr) ? "No vendor" : info.vendor, info.name));
     }
     return voices;
 }
