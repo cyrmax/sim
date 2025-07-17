@@ -25,4 +25,6 @@ class Speech {
 
     int m_defaultRate;
     int m_defaultVolume;
+    bool m_unsupportedVoiceIsSet = false;
+    std::vector<uint64_t> m_unsupportedVoiceIndices;
 };

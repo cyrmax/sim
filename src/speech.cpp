@@ -1,6 +1,7 @@
 #include "speech.h"
 
 #include "audio.h"
+#include "unsuportedVoicesFilter.h"
 
 #include <climits>
 #include <memory>
@@ -48,13 +49,21 @@ std::vector<std::string> Speech::getVoicesList() {
     }
     std::vector<std::string> voices;
     voices.reserve(voiceCount);
-    for (const auto& info : voiceInfos) {
-        voices.emplace_back(std::format("{} - {}", (info.vendor == nullptr) ? "No vendor" : info.vendor, info.name));
+    for (size_t i = 0; i < voiceInfos.size(); ++i) {
+        bool isSupported = CheckVoiceIsSupported(voiceInfos[i]);
+        if (!isSupported) {
+            m_unsupportedVoiceIndices.push_back(i);
+        }
+        voices.emplace_back(std::format("{}{}", isSupported ? "" : "!Not supported ", voiceInfos[i].name));
     }
     return voices;
 }
 
 bool Speech::speak(const char* text) {
+    if (m_unsupportedVoiceIsSet) {
+        spdlog::warn("Trying to speak with unsupported voice");
+        return false;
+    }
     spdlog::trace("Speaking text: {}", text);
     uint64_t bufferSize;
     int channels;
@@ -71,6 +80,8 @@ bool Speech::setRate(uint64_t rate) {
 }
 
 bool Speech::setVoice(uint64_t idx) {
+    m_unsupportedVoiceIsSet = std::find(m_unsupportedVoiceIndices.begin(), m_unsupportedVoiceIndices.end(), idx) !=
+                              m_unsupportedVoiceIndices.end();
     spdlog::trace("Setting voice ID to {}", idx);
     if (!SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_INDEX, &idx)) {
         spdlog::error("Failed to set voice index to {}", idx);
