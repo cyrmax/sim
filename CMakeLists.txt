@@ -44,6 +44,7 @@ FetchContent_Declare(miniaudio
   GIT_REPOSITORY https://github.com/mackron/miniaudio.git
   GIT_TAG 0.11.22
   GIT_SHALLOW ON
+  SYSTEM
 )
 # Configure miniaudio build options
 set(MINIAUDIO_NO_LIBVORBIS ON CACHE BOOL "Disable libvorbis as we don't use it")
@@ -67,6 +68,7 @@ FetchContent_Declare(SRAL
   GIT_REPOSITORY https://github.com/m1maker/SRAL.git
   GIT_TAG "48440dd"
   GIT_SHALLOW ON
+  SYSTEM
 )
 FetchContent_MakeAvailable(SRAL)
 add_library(SRAL::SRAL_static ALIAS SRAL_static)
@@ -76,6 +78,7 @@ FetchContent_Declare(spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git
   GIT_TAG v1.15.3
   GIT_SHALLOW ON
+  SYSTEM
 )
 # Ensure spdlog is built as a static library
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
@@ -86,6 +89,7 @@ FetchContent_Declare(wxWidgets
   GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
   GIT_TAG v3.3.0
   GIT_SHALLOW ON
+  SYSTEM
 )
 # wxWidgets options (these are applied before FetchContent_MakeAvailable)
 set(wxBUILD_SHARED OFF CACHE BOOL "" FORCE)
@@ -126,7 +130,7 @@ target_include_directories(sim PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(sim PRIVATE
   miniaudio
   SRAL::SRAL_static
-  spdlog::spdlog  
+  spdlog::spdlog
   wx::core
   wx::base
 )
