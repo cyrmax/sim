@@ -31,7 +31,7 @@ endif()
 
 target_compile_definitions(sim PRIVATE
   SRAL_STATIC
-  SPDLOG_COMPILED_LIB
+  # SPDLOG_COMPILED_LIB
   wxMSVC_VERSION_ABI_COMPAT # Important for wxWidgets v3.3.0+
 )
 
@@ -82,6 +82,7 @@ FetchContent_Declare(spdlog
 )
 # Ensure spdlog is built as a static library
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(SPDLOG_NO_ATOMIC_LEVELS ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(spdlog)
 
 # wxWidgets
@@ -91,7 +92,6 @@ FetchContent_Declare(wxWidgets
   GIT_SHALLOW ON
   SYSTEM
 )
-# wxWidgets options (these are applied before FetchContent_MakeAvailable)
 set(wxBUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(wxBUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(wxBUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -121,7 +121,6 @@ set(wxBUILD_OPTIMISE ON CACHE BOOL "" FORCE)
 set(wxBUILD_STRIPPED_RELEASE ON CACHE BOOL "" FORCE)
 set(wxWidgets_USE_STATIC ON CACHE BOOL "" FORCE)
 set(wxUSE_EXTENDED_RTTI OFF CACHE BOOL "" FORCE)
-set(wxUSE_NO_RTTI OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(wxWidgets)
 
 
@@ -130,7 +129,7 @@ target_include_directories(sim PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(sim PRIVATE
   miniaudio
   SRAL::SRAL_static
-  spdlog::spdlog
+  spdlog::spdlog_header_only
   wx::core
   wx::base
 )
