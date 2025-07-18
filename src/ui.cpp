@@ -110,7 +110,10 @@ void MainFrame::OnEnterPress(wxCommandEvent& event) {
         return;
     }
     auto text = m_messageField->GetValue();
-    Speech::GetInstance().speak(text.ToUTF8().data());
+    if (!Speech::GetInstance().speak(text.ToUTF8().data())) {
+        wxMessageBox("This voice either does not work with the program or crashes it. Please select another voice.",
+                     "Error! The selected SAPI voice is not supported.", 5L, m_panel);
+    }
     g_HistoryStorage.push(text.ToStdString());
     m_messageField->Clear();
 }
