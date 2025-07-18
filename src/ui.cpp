@@ -7,6 +7,7 @@
 
 #include <spdlog/spdlog.h>
 #include <string>
+#include <wx/string.h>
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
     m_panel = new wxPanel(this, wxID_ANY);
@@ -109,23 +110,24 @@ void MainFrame::OnEnterPress(wxCommandEvent& event) {
     if (m_messageField->IsEmpty()) {
         return;
     }
-    auto text = m_messageField->GetValue();
-    if (!Speech::GetInstance().speak(text.ToUTF8().data())) {
+    wxString messageText = m_messageField->GetValue();
+    std::string text = std::string(messageText.utf8_str());
+    if (!Speech::GetInstance().speak(text.c_str())) {
         wxMessageBox("This voice either does not work with the program or crashes it. Please select another voice.",
                      "Error! The selected SAPI voice is not supported.", 5L, m_panel);
     }
-    g_HistoryStorage.push(text.ToStdString());
+    g_HistoryStorage.push(text);
     m_messageField->Clear();
 }
 
 void MainFrame::OnMessageFieldKeyDown(wxKeyEvent& event) {
-    auto text = m_messageField->GetValue().ToStdString();
+    std::string text = std::string(m_messageField->GetValue().utf8_str());
     switch (event.GetKeyCode()) {
         case WXK_UP:
-            m_messageField->SetValue(g_HistoryStorage.getPreviousByText(text));
+            m_messageField->SetValue(wxString::FromUTF8(g_HistoryStorage.getPreviousByText(text)));
             break;
         case WXK_DOWN:
-            m_messageField->SetValue(g_HistoryStorage.getNextByText(text));
+            m_messageField->SetValue(wxString::FromUTF8(g_HistoryStorage.getNextByText(text)));
             break;
     }
     event.Skip();
