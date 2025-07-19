@@ -117,14 +117,13 @@ class Audio {
         if (ma_device_id_equal(&m_currentDeviceID, &m_selectedDeviceID)) {
             return;
         }
-        spdlog::trace("Initializing new audio device");
+        spdlog::debug("Initializing new audio device");
         m_device = std::make_unique<CDevice>(&m_selectedDeviceID, &Audio::audioDataCallback);
         ma_device_start(*m_device);
         m_currentDeviceID = m_selectedDeviceID;
     }
 
     static void audioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, const ma_uint32 frameCount) {
-        spdlog::trace("Audio data callback called");
         auto engine = (ma_engine*)pDevice->pUserData;
         if (engine == nullptr) {
             return;
@@ -136,14 +135,6 @@ class Audio {
         ma_sound sound;
         ma_audio_buffer audioBuffer;
     };
-
-    static void soundEndCallback(void* pUserData, ma_sound* pSound) {
-        spdlog::trace("Sound end callback called");
-        auto payload = (SoundPayload*)pUserData;
-        ma_sound_uninit(pSound);
-        ma_audio_buffer_uninit(&payload->audioBuffer);
-        delete payload;
-    }
 };
 
 #define g_Audio CSingleton<Audio>::GetInstance()
