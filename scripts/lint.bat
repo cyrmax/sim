@@ -7,7 +7,7 @@ setlocal enabledelayedexpansion
 :: It requires a compilation database generated with a specific 'lint' preset.
 :: ============================================================================
 
-set "LINT_PRESET_NAME=windows-msvc-x64-lint"
+set "LINT_PRESET_NAME=windows-msvc-x64-debug"
 set "BUILD_DIR=build/!LINT_PRESET_NAME!"
 
 if not exist "!BUILD_DIR!/compile_commands.json" (
