@@ -15,12 +15,10 @@ Speech::Speech() {
         SRAL_Initialize(SRAL_ENGINE_NVDA | SRAL_ENGINE_JAWS | SRAL_ENGINE_UIA);
         spdlog::debug("SRAL initialized");
     }
-    SRAL_GetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &m_defaultRate);
-    spdlog::debug("Default speech rate: {}; default speech volume: {}", m_defaultRate, g_Audio.getVolume());
 }
 
 Speech::~Speech() {
-    spdlog::debug("SRAL destructor called");
+    spdlog::debug("Uninitializing SRAL");
     if (SRAL_IsInitialized()) {
         SRAL_Uninitialize();
         spdlog::debug("SRAL uninitialized");
@@ -38,7 +36,6 @@ std::vector<std::string> Speech::getVoicesList() {
         spdlog::error("Failed to get voice count from SRAL.");
         return {}; // Return an empty vector on failure.
     }
-    spdlog::debug("SRAL reports {} voices", voiceCount);
     if (voiceCount <= 0) {
         return {};
     }
@@ -64,7 +61,6 @@ bool Speech::speak(const char* text) {
         spdlog::warn("Trying to speak with unsupported voice");
         return false;
     }
-    spdlog::trace("Speaking text: {}", text);
     uint64_t bufferSize;
     int channels;
     int sampleRate;
@@ -75,14 +71,12 @@ bool Speech::speak(const char* text) {
 }
 
 bool Speech::setRate(uint64_t rate) {
-    spdlog::trace("Setting rate to {}", rate);
     return SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_SPEECH_RATE, &rate);
 }
 
 bool Speech::setVoice(uint64_t idx) {
     m_unsupportedVoiceIsSet = std::find(m_unsupportedVoiceIndices.begin(), m_unsupportedVoiceIndices.end(), idx) !=
                               m_unsupportedVoiceIndices.end();
-    spdlog::trace("Setting voice ID to {}", idx);
     if (!SRAL_SetEngineParameter(SRAL_ENGINE_SAPI, SRAL_PARAM_VOICE_INDEX, &idx)) {
         spdlog::error("Failed to set voice index to {}", idx);
         return false;

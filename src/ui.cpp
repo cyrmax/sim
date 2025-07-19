@@ -78,7 +78,6 @@ void MainFrame::populateVoicesList() {
         m_voicesList->AppendString("No voices available");
     }
     for (const auto& voiceName : voices) {
-        spdlog::trace("Appending voice with name {}", voiceName);
         m_voicesList->AppendString(wxString::FromUTF8(voiceName));
     }
     m_voicesList->SetSelection(0);
