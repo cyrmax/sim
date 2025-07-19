@@ -93,7 +93,7 @@ void MainFrame::populateDevicesList() {
     }
     for (const auto& device : devices) {
         auto isDefaultStr = device.isDefault ? "[default]" : "";
-        m_outputDevicesList->AppendString(std::format("{} {}", isDefaultStr, device.name));
+        m_outputDevicesList->AppendString(wxString::FromUTF8(std::format("{} {}", isDefaultStr, device.name)));
     }
     m_outputDevicesList->SetSelection(0);
 }
