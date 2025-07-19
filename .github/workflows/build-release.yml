@@ -83,6 +83,9 @@ jobs:
           name: binary-x86
           path: release_binaries # Explicit download directory. [2, 4, 5]
 
+      - name: Generate CHANGELOG
+        run: scripts/generate-changelog.sh
+
       - name: Create release and upload binaries
         uses: softprops/action-gh-release@v2
         with:
@@ -91,5 +94,6 @@ jobs:
             release_binaries/sim-x86.exe
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
+          body_path: CHANGELOG.md
           draft: false
           prerelease: contains(github.ref, 'beta') || contains(github.ref, 'alpha') || contains(github.ref, 'rc')
