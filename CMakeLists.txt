@@ -66,10 +66,11 @@ FetchContent_MakeAvailable(miniaudio)
 # SRAL
 FetchContent_Declare(SRAL
   GIT_REPOSITORY https://github.com/m1maker/SRAL.git
-  GIT_TAG "48440dd"
+  GIT_TAG "0.4-RC"
   GIT_SHALLOW ON
   SYSTEM
 )
+set(BUILD_SRAL_TEST OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(SRAL)
 add_library(SRAL::SRAL_static ALIAS SRAL_static)
 
