@@ -5,11 +5,16 @@
 #include "loggerSetup.h"
 #include "speech.h"
 
+#include <CLI/CLI.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <wx/string.h>
 
-MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title) {
+MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, int cliOutputDeviceIndex, bool cliIsHelpRequested)
+    : wxFrame(nullptr, wxID_ANY, title) {
+    m_cliVoiceIndex = cliVoiceIndex;
+    m_cliOutputDeviceIndex = cliOutputDeviceIndex;
+    m_cliIsHelpRequested = cliIsHelpRequested;
     m_panel = new wxPanel(this, wxID_ANY);
     auto* mainSizer = new wxBoxSizer(wxVERTICAL);
     auto* selectionsSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -80,7 +85,7 @@ void MainFrame::populateVoicesList() {
     for (const auto& voiceName : voices) {
         m_voicesList->AppendString(wxString::FromUTF8(voiceName));
     }
-    m_voicesList->SetSelection(0);
+    m_voicesList->SetSelection(m_cliVoiceIndex);
 }
 
 void MainFrame::populateDevicesList() {
@@ -94,7 +99,7 @@ void MainFrame::populateDevicesList() {
         auto isDefaultStr = device.isDefault ? "[default]" : "";
         m_outputDevicesList->AppendString(wxString::FromUTF8(std::format("{} {}", isDefaultStr, device.name)));
     }
-    m_outputDevicesList->SetSelection(0);
+    m_outputDevicesList->SetSelection(m_cliOutputDeviceIndex);
 }
 
 void MainFrame::OnRateSliderChange(wxCommandEvent& event) {
@@ -151,13 +156,24 @@ void MainFrame::OnCharEvent(wxKeyEvent& event) {
 }
 
 bool MyApp::OnInit() {
-    InitializeLogging(MyApp::argc, MyApp::argv);
-    if (!wxApp::OnInit()) {
-        spdlog::critical("Failed to initialize WX");
-        return false;
-    }
-    MainFrame* frame = new MainFrame("SIM test");
+    CLI::App cliApp{"SIM - Speak Instead of Me speech utility"};
+    auto argv = cliApp.ensure_utf8(MyApp::argv);
+    bool cliIsDebugEnabled = false;
+    cliApp.add_flag("-D,--debug", cliIsDebugEnabled, "Enable the debug logging for release builds");
+    int cliVoiceIndex = 0;
+    cliApp.add_option("-v,--voice", cliVoiceIndex, "Specify SAPI voice index to be selected at program start");
+    int cliOutputDeviceIndex = 0;
+    cliApp.add_option("-d,--device", cliOutputDeviceIndex,
+                      "Specify output device number to be selected at program start");
+    bool cliIsHelpRequested = false;
+    CLI11_PARSE(cliApp, MyApp::argc, argv);
+    InitializeLogging(MyApp::argc, MyApp::argv, cliIsDebugEnabled);
+    auto* frame = new MainFrame("SIM test", cliVoiceIndex, cliOutputDeviceIndex, cliIsHelpRequested);
     frame->Show(true);
     spdlog::debug("Main window shown");
     return true;
+}
+
+void MyApp::OnInitCmdLine(wxCmdLineParser& parser) {
+    // Left empty to bypass wxWidgets cli parsing
 }

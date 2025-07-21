@@ -5,7 +5,8 @@
 
 class MainFrame : public wxFrame {
   public:
-    MainFrame(const wxString& title);
+    MainFrame(const wxString& title, int cliVoiceIndex = 0, int cliOutputDeviceIndex = 0,
+              bool cliIsHelpRequested = false);
 
   private:
     wxPanel* m_panel;
@@ -14,6 +15,9 @@ class MainFrame : public wxFrame {
     wxListBox* m_outputDevicesList;
     wxSlider* m_rateSlider;
     wxSlider* m_volumeSlider;
+    int m_cliVoiceIndex = 0;
+    int m_cliOutputDeviceIndex = 0;
+    bool m_cliIsHelpRequested = false;
 
     void populateVoicesList();
     void populateDevicesList();
@@ -29,5 +33,6 @@ class MainFrame : public wxFrame {
 
 class MyApp : public wxApp {
   public:
-    virtual bool OnInit();
+    virtual bool OnInit() override;
+    virtual void OnInitCmdLine(wxCmdLineParser& parser) override;
 };

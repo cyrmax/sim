@@ -39,6 +39,15 @@ target_compile_definitions(sim PRIVATE
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_dependencies)
 
+# cli11
+FetchContent_Declare(CLI11
+GIT_REPOSITORY https://github.com/CLIUtils/CLI11
+GIT_TAG v2.5.0
+GIT_SHALLOW ON
+SYSTEM
+)
+FetchContent_MakeAvailable(CLI11)
+
 # miniaudio
 FetchContent_Declare(miniaudio
   GIT_REPOSITORY https://github.com/mackron/miniaudio.git
@@ -129,6 +138,7 @@ target_include_directories(sim PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 target_link_libraries(sim PRIVATE
   miniaudio
+  CLI11::CLI11
   SRAL::SRAL_static
   spdlog::spdlog_header_only
   wx::core

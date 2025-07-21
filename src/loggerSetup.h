@@ -1,3 +1,3 @@
 #pragma once
 
-void InitializeLogging(int argc, char* argv[]);
+void InitializeLogging(int argc, char* argv[], bool isDebuggingEnabled);
