@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'scripts/**'
   pull_request:
     branches:
       - master
+    paths:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'scripts/**'
 
 jobs:
   code-quality:
