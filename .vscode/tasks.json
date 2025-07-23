@@ -3,10 +3,10 @@
   "tasks": [
     // --- Configure Tasks ---
     {
-      "label": "CMake: Configure (Debug)",
+      "label": "CMake: Configure (Debug x64)",
       "type": "shell",
       "command": "cmake",
-      "args": ["--preset", "windows-msvc-debug"],
+      "args": ["--preset", "windows-msvc-x64-debug"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -14,10 +14,10 @@
       "problemMatcher": []
     },
     {
-      "label": "CMake: Configure (Release)",
+      "label": "CMake: Configure (Release x64)",
       "type": "shell",
       "command": "cmake",
-      "args": ["--preset", "windows-msvc-release"],
+      "args": ["--preset", "windows-msvc-x64-release"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -26,13 +26,13 @@
     },
     // --- Build Tasks ---
     {
-      "label": "CMake: Build (Debug)",
+      "label": "CMake: Build (Debug x64)",
       "type": "shell",
       "command": "cmake",
       "args": [
         "--build",
         "--preset",
-        "debug" // This refers to the buildPreset name
+        "debug-x64" // This refers to the buildPreset name
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -42,7 +42,7 @@
         "isDefault": true // Makes this the default build task (Ctrl+Shift+B)
       },
       "problemMatcher": ["$msCompile"],
-      "dependsOn": ["CMake: Configure (Debug)"] // Ensure configure runs first
+      "dependsOn": ["CMake: Configure (Debug x64)"] // Ensure configure runs first
     },
     {
       "label": "CMake: Build (Release)",
@@ -51,23 +51,23 @@
       "args": [
         "--build",
         "--preset",
-        "release" // This refers to the buildPreset name
+        "release-x64" // This refers to the buildPreset name
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "group": "build",
       "problemMatcher": ["$msCompile"],
-      "dependsOn": ["CMake: Configure (Release)"] // Ensure configure runs first
+      "dependsOn": ["CMake: Configure (Release x64)"] // Ensure configure runs first
     },
     // --- Clean Tasks (Optional but useful) ---
     {
-      "label": "CMake: Clean (Debug)",
+      "label": "CMake: Clean (Debug x64)",
       "type": "shell",
       "command": "cmake",
       "args": [
         "--build",
-        "${sourceFolder}/build/windows-msvc-debug", // Direct path to build dir
+        "${sourceFolder}/build/windows-msvc-x64-debug", // Direct path to build dir
         "--target",
         "clean"
       ],
@@ -78,12 +78,12 @@
       "problemMatcher": []
     },
     {
-      "label": "CMake: Clean (Release)",
+      "label": "CMake: Clean (Release x64)",
       "type": "shell",
       "command": "cmake",
       "args": [
         "--build",
-        "${sourceFolder}/build/windows-msvc-release", // Direct path to build dir
+        "${sourceFolder}/build/windows-msvc-x64-release", // Direct path to build dir
         "--target",
         "clean"
       ],
