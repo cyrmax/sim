@@ -19,7 +19,7 @@ Note that for now the feature list is a bit more kind of todo list for developer
 - [x] Clear input text field on enter press and successful speech;
 - [x] Accept command line arguments (to create a personalized shortcut with predefined settings);
 - [ ] Display more friendly and understandable SAPI voice names (currently will not be implemented due to SRAL and BlastSpeak implementation details);
-- [ ] Modify audio system logic to avoid resampling artifacts;
+- [x] Modify audio system logic to avoid resampling artifacts;
 - [ ] Implement some localization system;
 - [ ] Offer some user-friendly translation workflow;
 
