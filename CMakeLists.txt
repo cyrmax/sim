@@ -22,7 +22,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 file(GLOB SIM_SOURCES "src/*.cpp")
+
 add_executable(sim ${SIM_SOURCES})
+
 
 if(WIN32)
   set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
