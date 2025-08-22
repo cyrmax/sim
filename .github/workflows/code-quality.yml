@@ -27,13 +27,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Clang-Tools (LLVM)
-        run: choco install llvm --version=20.1.7 -y
-
-      - name: Add LLVM to PATH for subsequent steps
-        # This is a robust way to ensure the tools are found
-        run: echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
       - name: Verify clang-tools installation
         run: |
           clang-format --version
