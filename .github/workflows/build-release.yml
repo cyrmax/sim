@@ -75,16 +75,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: binary-x64
-          path: release_binaries # Explicit download directory. [2, 4, 5]
+          path: release_binaries
 
       - name: Download x86 binary
         uses: actions/download-artifact@v4
         with:
           name: binary-x86
-          path: release_binaries # Explicit download directory. [2, 4, 5]
+          path: release_binaries
 
       - name: Generate CHANGELOG
-        run: scripts/generate-changelog.sh
+        run: |
+            chmod +x scripts/generate-changelog.sh
+            scripts/generate-changelog.sh
 
       - name: Create release and upload binaries
         uses: softprops/action-gh-release@v2
