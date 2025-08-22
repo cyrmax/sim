@@ -68,6 +68,9 @@ jobs:
     needs: [build-x64, build-x86] # Depends on both successful builds
     runs-on: ubuntu-latest # ubuntu-latest is sufficient for creating the release
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Create a directory for binaries
         run: mkdir release_binaries
 
