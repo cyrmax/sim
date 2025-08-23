@@ -6,9 +6,12 @@
 #include "speech.h"
 
 #include <CLI/CLI.hpp>
+#include <cstring>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <wx/string.h>
+
+static std::string PROGRAM_TITLE = std::format("SIM {}", SIM_FULL_VERSION);
 
 MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, int cliOutputDeviceIndex, bool cliIsHelpRequested)
     : wxFrame(nullptr, wxID_ANY, title) {
@@ -115,7 +118,7 @@ void MainFrame::OnEnterPress(wxCommandEvent& event) {
         return;
     }
     wxString messageText = m_messageField->GetValue();
-    std::string text = std::string(messageText.utf8_str());
+    auto text = std::string(messageText.utf8_str());
     if (!Speech::GetInstance().speak(text.c_str())) {
         wxMessageBox("This voice either does not work with the program or crashes it. Please select another voice.",
                      "Error! The selected SAPI voice is not supported.", 5L, m_panel);
@@ -125,13 +128,15 @@ void MainFrame::OnEnterPress(wxCommandEvent& event) {
 }
 
 void MainFrame::OnMessageFieldKeyDown(wxKeyEvent& event) {
-    std::string text = std::string(m_messageField->GetValue().utf8_str());
+    auto text = std::string(m_messageField->GetValue().utf8_str());
     switch (event.GetKeyCode()) {
         case WXK_UP:
             m_messageField->SetValue(wxString::FromUTF8(g_HistoryStorage.getPreviousByText(text)));
             break;
         case WXK_DOWN:
             m_messageField->SetValue(wxString::FromUTF8(g_HistoryStorage.getNextByText(text)));
+            break;
+        default:
             break;
     }
     event.Skip();
@@ -168,7 +173,7 @@ bool MyApp::OnInit() {
     bool cliIsHelpRequested = false;
     CLI11_PARSE(cliApp, MyApp::argc, argv);
     InitializeLogging(MyApp::argc, MyApp::argv, cliIsDebugEnabled);
-    auto* frame = new MainFrame("SIM test", cliVoiceIndex, cliOutputDeviceIndex, cliIsHelpRequested);
+    auto* frame = new MainFrame(PROGRAM_TITLE, cliVoiceIndex, cliOutputDeviceIndex, cliIsHelpRequested);
     frame->Show(true);
     spdlog::debug("Main window shown");
     return true;

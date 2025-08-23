@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(sim VERSION 1.0)
+project(sim VERSION 1.5)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,7 +25,6 @@ file(GLOB SIM_SOURCES "src/*.cpp")
 
 add_executable(sim ${SIM_SOURCES})
 
-
 if(WIN32)
   set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
   target_compile_definitions(sim PRIVATE UNICODE _UNICODE)
@@ -36,6 +35,21 @@ target_compile_definitions(sim PRIVATE
   # SPDLOG_COMPILED_LIB
   wxMSVC_VERSION_ABI_COMPAT # Important for wxWidgets v3.3.0+
 )
+
+# Define project version string
+if(NOT DEFINED SIM_VERSION OR SIM_VERSION STREQUAL "")
+  set(SIM_VERSION "v0.0")
+endif()
+if(NOT DEFINED SIM_BUILD_NUMBER OR SIM_BUILD_NUMBER STREQUAL "")
+  set(SIM_BUILD_NUMBER "DevBuild")
+endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+set(SIM_DEBUG_STATUS " debug")
+else()
+set(SIM_DEBUG_STATUS " release")
+endif()
+set(FULL_VERSION_STRING "version ${PROJECT_VERSION} (${SIM_VERSION}.${SIM_BUILD_NUMBER})${SIM_DEBUG_STATUS}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE SIM_FULL_VERSION="${FULL_VERSION_STRING}")
 
 # --- Dependencies with FetchContent ---
 include(FetchContent)
