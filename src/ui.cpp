@@ -9,17 +9,19 @@
 #include <cstring>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <wx/clipbrd.h>
 #include <wx/string.h>
 
 static std::string PROGRAM_TITLE = std::format("SIM {}", SIM_FULL_VERSION);
 
 MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, std::string cliVoiceName, int cliOutputDeviceIndex,
-                     bool cliIsHelpRequested)
+                     std::string helpText)
     : wxFrame(nullptr, wxID_ANY, title) {
     m_cliVoiceIndex = cliVoiceIndex;
     m_cliVoiceName = cliVoiceName;
     m_cliOutputDeviceIndex = cliOutputDeviceIndex;
-    m_cliIsHelpRequested = cliIsHelpRequested;
+    m_helpText = helpText;
+
     m_panel = new wxPanel(this, wxID_ANY);
     auto* mainSizer = new wxBoxSizer(wxVERTICAL);
     auto* selectionsSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -40,6 +42,8 @@ MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, std::string cliVo
 
     auto* volumeSliderLabel = new wxStaticText(m_panel, wxID_ANY, "Output volume");
     m_volumeSlider = new wxSlider(m_panel, wxID_ANY, 100, 0, 100);
+
+    m_helpButton = new wxButton(m_panel, wxID_ANY, "Command Line Help");
 
     auto* voicesListSizer = new wxBoxSizer(wxVERTICAL);
     voicesListSizer->Add(voicesListLabel);
@@ -68,6 +72,8 @@ MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, std::string cliVo
 
     mainSizer->Add(selectionsSizer);
     mainSizer->Add(settingsSizer);
+    mainSizer->Add(m_helpButton);
+
     m_messageField->SetFocus();
     m_panel->SetSizer(mainSizer);
     this->Bind(wxEVT_CHAR_HOOK, &MainFrame::OnCharEvent, this);
@@ -77,6 +83,8 @@ MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, std::string cliVo
     m_messageField->Bind(wxEVT_KEY_DOWN, &MainFrame::OnMessageFieldKeyDown, this);
     m_voicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnVoiceChange, this);
     m_outputDevicesList->Bind(wxEVT_LISTBOX, &MainFrame::OnOutputDeviceChange, this);
+    m_helpButton->Bind(wxEVT_BUTTON, &MainFrame::OnHelpButton, this);
+
     populateVoicesList();
     populateDevicesList();
 }
@@ -170,6 +178,14 @@ void MainFrame::OnCharEvent(wxKeyEvent& event) {
     }
 }
 
+void MainFrame::OnHelpButton(wxCommandEvent& event) {
+    if (wxTheClipboard->Open()) {
+        wxTheClipboard->SetData(new wxTextDataObject(m_helpText));
+        wxTheClipboard->Close();
+    }
+    wxMessageBox(m_helpText, "Help text copied to clipboard");
+}
+
 bool MyApp::OnInit() {
     CLI::App cliApp{"SIM - Speak Instead of Me speech utility"};
     auto argv = cliApp.ensure_utf8(MyApp::argv);
@@ -186,10 +202,10 @@ bool MyApp::OnInit() {
     int cliOutputDeviceIndex = 0;
     cliApp.add_option("-d,--device", cliOutputDeviceIndex,
                       "Specify output device number to be selected at program start");
-    bool cliIsHelpRequested = false;
     CLI11_PARSE(cliApp, MyApp::argc, argv);
+
     InitializeLogging(MyApp::argc, MyApp::argv, cliIsDebugEnabled);
-    auto* frame = new MainFrame(PROGRAM_TITLE, cliVoiceIndex, cliVoiceName, cliOutputDeviceIndex, cliIsHelpRequested);
+    auto* frame = new MainFrame(PROGRAM_TITLE, cliVoiceIndex, cliVoiceName, cliOutputDeviceIndex, cliApp.help());
     frame->Show(true);
     spdlog::debug("Main window shown");
     return true;

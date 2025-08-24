@@ -6,7 +6,7 @@
 class MainFrame : public wxFrame {
   public:
     MainFrame(const wxString& title, int cliVoiceIndex = 0, std::string cliVoiceName = "", int cliOutputDeviceIndex = 0,
-              bool cliIsHelpRequested = false);
+              std::string cliHelpText = "");
 
   private:
     wxPanel* m_panel;
@@ -15,10 +15,11 @@ class MainFrame : public wxFrame {
     wxListBox* m_outputDevicesList;
     wxSlider* m_rateSlider;
     wxSlider* m_volumeSlider;
+    wxButton* m_helpButton;
     int m_cliVoiceIndex = 0;
     std::string m_cliVoiceName;
     int m_cliOutputDeviceIndex = 0;
-    bool m_cliIsHelpRequested = false;
+    std::string m_helpText;
 
     void populateVoicesList();
     void populateDevicesList();
@@ -30,6 +31,7 @@ class MainFrame : public wxFrame {
     void OnVolumeSliderChange(wxCommandEvent& event);
     void OnRefresh(wxCommandEvent& event);
     void OnCharEvent(wxKeyEvent& event);
+    void OnHelpButton(wxCommandEvent& event);
 };
 
 class MyApp : public wxApp {
