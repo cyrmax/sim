@@ -13,9 +13,11 @@
 
 static std::string PROGRAM_TITLE = std::format("SIM {}", SIM_FULL_VERSION);
 
-MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, int cliOutputDeviceIndex, bool cliIsHelpRequested)
+MainFrame::MainFrame(const wxString& title, int cliVoiceIndex, std::string cliVoiceName, int cliOutputDeviceIndex,
+                     bool cliIsHelpRequested)
     : wxFrame(nullptr, wxID_ANY, title) {
     m_cliVoiceIndex = cliVoiceIndex;
+    m_cliVoiceName = cliVoiceName;
     m_cliOutputDeviceIndex = cliOutputDeviceIndex;
     m_cliIsHelpRequested = cliIsHelpRequested;
     m_panel = new wxPanel(this, wxID_ANY);
@@ -85,10 +87,18 @@ void MainFrame::populateVoicesList() {
     if (voices.empty()) {
         m_voicesList->AppendString("No voices available");
     }
+    size_t voiceCounter = 0;
+    bool isVoiceFoundByName = false;
     for (const auto& voiceName : voices) {
         m_voicesList->AppendString(wxString::FromUTF8(voiceName));
+        if (!isVoiceFoundByName && voiceName == m_cliVoiceName) {
+            m_cliVoiceIndex = voiceCounter;
+            isVoiceFoundByName = true;
+        }
+        voiceCounter++;
     }
     m_voicesList->SetSelection(m_cliVoiceIndex);
+    Speech::GetInstance().setVoice(m_cliVoiceIndex);
 }
 
 void MainFrame::populateDevicesList() {
@@ -165,15 +175,21 @@ bool MyApp::OnInit() {
     auto argv = cliApp.ensure_utf8(MyApp::argv);
     bool cliIsDebugEnabled = false;
     cliApp.add_flag("-D,--debug", cliIsDebugEnabled, "Enable the debug logging for release builds");
+    std::string cliVoiceName = "";
+    cliApp.add_option(
+        "-n,--voice-name", cliVoiceName,
+        "Specify SAPI voice name to be selected at program start. If present and found, then voice index is ignored");
     int cliVoiceIndex = 0;
-    cliApp.add_option("-v,--voice", cliVoiceIndex, "Specify SAPI voice index to be selected at program start");
+    cliApp.add_option("-v,--voice", cliVoiceIndex,
+                      "Specify SAPI voice index to be selected at program start. If voice is selected by name and is "
+                      "successfully found, then this option is ignored.");
     int cliOutputDeviceIndex = 0;
     cliApp.add_option("-d,--device", cliOutputDeviceIndex,
                       "Specify output device number to be selected at program start");
     bool cliIsHelpRequested = false;
     CLI11_PARSE(cliApp, MyApp::argc, argv);
     InitializeLogging(MyApp::argc, MyApp::argv, cliIsDebugEnabled);
-    auto* frame = new MainFrame(PROGRAM_TITLE, cliVoiceIndex, cliOutputDeviceIndex, cliIsHelpRequested);
+    auto* frame = new MainFrame(PROGRAM_TITLE, cliVoiceIndex, cliVoiceName, cliOutputDeviceIndex, cliIsHelpRequested);
     frame->Show(true);
     spdlog::debug("Main window shown");
     return true;

@@ -5,7 +5,7 @@
 
 class MainFrame : public wxFrame {
   public:
-    MainFrame(const wxString& title, int cliVoiceIndex = 0, int cliOutputDeviceIndex = 0,
+    MainFrame(const wxString& title, int cliVoiceIndex = 0, std::string cliVoiceName = "", int cliOutputDeviceIndex = 0,
               bool cliIsHelpRequested = false);
 
   private:
@@ -16,6 +16,7 @@ class MainFrame : public wxFrame {
     wxSlider* m_rateSlider;
     wxSlider* m_volumeSlider;
     int m_cliVoiceIndex = 0;
+    std::string m_cliVoiceName;
     int m_cliOutputDeviceIndex = 0;
     bool m_cliIsHelpRequested = false;
 
