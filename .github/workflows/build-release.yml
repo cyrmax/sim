@@ -22,6 +22,7 @@ jobs:
           arch: x64
 
       - name: Configure and build
+        shell: cmd
         run: scripts\build-release.bat
 
       - name: Rename binary for release
@@ -46,7 +47,8 @@ jobs:
           arch: x86
 
       - name: Configure and build
-        run: scripts\build-release.bat
+        shell: cmd
+        run: scripts\build-release32.bat
 
       - name: Rename binary for release
         run: ren build\windows-msvc-x86-release\sim.exe sim-x86.exe
