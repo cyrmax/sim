@@ -21,11 +21,8 @@ jobs:
         with:
           arch: x64
 
-      - name: Configure CMake
-        run: cmake --preset=windows-msvc-x64-release
-
-      - name: Build project
-        run: cmake --build --preset=release-x64
+      - name: Configure and build
+        run: scripts\build-release.bat
 
       - name: Rename binary for release
         run: ren build\windows-msvc-x64-release\sim.exe sim-x64.exe
@@ -48,11 +45,8 @@ jobs:
         with:
           arch: x86
 
-      - name: Configure CMake
-        run: cmake --preset=windows-msvc-x86-release
-
-      - name: Build project
-        run: cmake --build --preset=release-x86
+      - name: Configure and build
+        run: scripts\build-release.bat
 
       - name: Rename binary for release
         run: ren build\windows-msvc-x86-release\sim.exe sim-x86.exe
@@ -88,8 +82,8 @@ jobs:
 
       - name: Generate CHANGELOG
         run: |
-            chmod +x scripts/generate-changelog.sh
-            scripts/generate-changelog.sh
+          chmod +x scripts/generate-changelog.sh
+          scripts/generate-changelog.sh
 
       - name: Create release and upload binaries
         uses: softprops/action-gh-release@v2
