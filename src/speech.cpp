@@ -4,6 +4,7 @@
 #include "unsupportedVoicesFilter.h"
 
 #include <climits>
+#include <cstdlib>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -61,13 +62,22 @@ bool Speech::speak(const char* text) {
         spdlog::warn("Trying to speak with unsupported voice");
         return false;
     }
-    uint64_t bufferSize;
-    int channels;
-    int sampleRate;
-    int bitsPerSample;
+    uint64_t bufferSize = 0;
+    int channels = 0;
+    int sampleRate = 0;
+    int bitsPerSample = 0;
     auto* data = SRAL_SpeakToMemoryEx(SRAL_ENGINE_SAPI, text, &bufferSize, &channels, &sampleRate, &bitsPerSample);
-    g_Audio.playAudioData(channels, sampleRate, bitsPerSample, bufferSize, data);
-    return true;
+    if (data == nullptr) {
+        spdlog::error("SRAL_SpeakToMemoryEx returned nullptr");
+        return false;
+    }
+    if (channels <= 0 || sampleRate <= 0 || bitsPerSample <= 0) {
+        spdlog::error("SRAL returned invalid audio metadata: channels={}, sampleRate={}, bitsPerSample={}", channels,
+                      sampleRate, bitsPerSample);
+        free(data);
+        return false;
+    }
+    return g_Audio.playAudioData(channels, sampleRate, bitsPerSample, bufferSize, data);
 }
 
 bool Speech::setRate(uint64_t rate) {

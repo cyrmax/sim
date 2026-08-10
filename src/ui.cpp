@@ -94,6 +94,8 @@ void MainFrame::populateVoicesList() {
     auto voices = Speech::GetInstance().getVoicesList();
     if (voices.empty()) {
         m_voicesList->AppendString("No voices available");
+        spdlog::warn("No voices available, voice selection is disabled");
+        return;
     }
     size_t voiceCounter = 0;
     bool isVoiceFoundByName = false;
@@ -105,8 +107,12 @@ void MainFrame::populateVoicesList() {
         }
         voiceCounter++;
     }
+    if (m_cliVoiceIndex < 0 || static_cast<size_t>(m_cliVoiceIndex) >= voices.size()) {
+        spdlog::warn("Voice index {} is out of range. Falling back to 0.", m_cliVoiceIndex);
+        m_cliVoiceIndex = 0;
+    }
     m_voicesList->SetSelection(m_cliVoiceIndex);
-    Speech::GetInstance().setVoice(m_cliVoiceIndex);
+    Speech::GetInstance().setVoice(static_cast<uint64_t>(m_cliVoiceIndex));
 }
 
 void MainFrame::populateDevicesList() {
@@ -120,7 +126,12 @@ void MainFrame::populateDevicesList() {
         auto isDefaultStr = device.isDefault ? "[default]" : "";
         m_outputDevicesList->AppendString(wxString::FromUTF8(std::format("{} {}", isDefaultStr, device.name)));
     }
+    if (m_cliOutputDeviceIndex < 0 || static_cast<size_t>(m_cliOutputDeviceIndex) >= devices.size()) {
+        spdlog::warn("Device index {} is out of range. Falling back to 0.", m_cliOutputDeviceIndex);
+        m_cliOutputDeviceIndex = 0;
+    }
     m_outputDevicesList->SetSelection(m_cliOutputDeviceIndex);
+    g_Audio.selectDevice(static_cast<size_t>(m_cliOutputDeviceIndex));
 }
 
 void MainFrame::OnRateSliderChange(wxCommandEvent& event) {
@@ -162,12 +173,20 @@ void MainFrame::OnMessageFieldKeyDown(wxKeyEvent& event) {
 
 void MainFrame::OnVoiceChange(wxCommandEvent& event) {
     int value = m_voicesList->GetSelection();
-    Speech::GetInstance().setVoice(value);
+    if (value == wxNOT_FOUND) {
+        spdlog::warn("Voice selection event received with no selection");
+        return;
+    }
+    Speech::GetInstance().setVoice(static_cast<uint64_t>(value));
 }
 
 void MainFrame::OnOutputDeviceChange(wxCommandEvent& event) {
     int value = m_outputDevicesList->GetSelection();
-    g_Audio.selectDevice(value);
+    if (value == wxNOT_FOUND) {
+        spdlog::warn("Device selection event received with no selection");
+        return;
+    }
+    g_Audio.selectDevice(static_cast<size_t>(value));
 }
 
 void MainFrame::OnCharEvent(wxKeyEvent& event) {

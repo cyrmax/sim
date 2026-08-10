@@ -3,6 +3,7 @@
 #include "singleton.h"
 
 #include <climits>
+#include <cstring>
 #include <memory>
 #include <miniaudio.h>
 #include <spdlog/spdlog.h>
@@ -131,15 +132,18 @@ class CResampler {
         return resampler != nullptr ? ma_resampler_set_rate(&*resampler, sampleRateIn, sampleRateOut) : MA_ERROR;
     }
 
-    ma_result processAudioData(const void* pFramesIn, const ma_uint64& frameCountIn, void* pFramesOut,
+    ma_result processAudioData(const void* pFramesIn, ma_uint64 frameCountIn, void* pFramesOut,
                                ma_uint64& frameCountOut) {
         if (pFramesIn == nullptr || pFramesOut == nullptr) {
             return MA_INVALID_ARGS;
         }
 
-        return resampler != nullptr ? ma_resampler_process_pcm_frames(&*resampler, pFramesIn, (ma_uint64*)&frameCountIn,
-                                                                      pFramesOut, &frameCountOut)
-                                    : MA_ERROR;
+        if (resampler == nullptr) {
+            return MA_ERROR;
+        }
+
+        ma_uint64 inFrames = frameCountIn;
+        return ma_resampler_process_pcm_frames(&*resampler, pFramesIn, &inFrames, pFramesOut, &frameCountOut);
     }
 
   private:
@@ -149,7 +153,17 @@ class CResampler {
 
 class Audio {
   public:
-    Audio() : m_device(nullptr) { m_selectedDeviceID = getDevicesList()[0].id; }
+    Audio() : m_device(nullptr), m_hasCurrentDevice(false) {
+        auto devices = getDevicesList();
+        if (devices.empty()) {
+            spdlog::warn("No audio devices found during Audio initialization");
+            std::memset(&m_selectedDeviceID, 0, sizeof(m_selectedDeviceID));
+            std::memset(&m_currentDeviceID, 0, sizeof(m_currentDeviceID));
+            return;
+        }
+        m_selectedDeviceID = devices[0].id;
+        std::memset(&m_currentDeviceID, 0, sizeof(m_currentDeviceID));
+    }
     ~Audio() = default;
 
     std::vector<DeviceInfo> getDevicesList();
@@ -164,16 +178,18 @@ class Audio {
     std::unique_ptr<CResampler> m_resampler;
     ma_device_id m_selectedDeviceID;
     ma_device_id m_currentDeviceID;
+    bool m_hasCurrentDevice;
     std::vector<DeviceInfo> m_lastDevicesList;
 
     void updateDevice() {
-        if (ma_device_id_equal(&m_currentDeviceID, &m_selectedDeviceID)) {
+        if (m_hasCurrentDevice && ma_device_id_equal(&m_currentDeviceID, &m_selectedDeviceID)) {
             return;
         }
         spdlog::debug("Initializing new audio device");
         m_device = std::make_unique<CDevice>(&m_selectedDeviceID, &Audio::audioDataCallback);
         ma_device_start(*m_device);
         m_currentDeviceID = m_selectedDeviceID;
+        m_hasCurrentDevice = true;
     }
 
     void updateResampler(ma_format format, ma_uint32 channels, ma_uint32 sampleRateIn, ma_uint32 sampleRateOut) {

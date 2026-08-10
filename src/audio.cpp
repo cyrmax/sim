@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <algorithm>
+#include <cstdlib>
 
 std::vector<DeviceInfo> Audio::getDevicesList() {
     std::vector<DeviceInfo> deviceInfos;
@@ -23,6 +24,14 @@ std::vector<DeviceInfo> Audio::getDevicesList() {
 }
 
 void Audio::selectDevice(size_t deviceIndex) {
+    if (m_lastDevicesList.empty()) {
+        spdlog::warn("Cannot select audio device: device list is empty");
+        return;
+    }
+    if (deviceIndex >= m_lastDevicesList.size()) {
+        spdlog::warn("Device index {} is out of range. Falling back to 0.", deviceIndex);
+        deviceIndex = 0;
+    }
     m_selectedDeviceID = m_lastDevicesList[deviceIndex].id;
 }
 
@@ -33,9 +42,39 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
         return false;
     }
 
+    if (channels <= 0 || bitsPerSample <= 0 || sampleRate <= 0) {
+        spdlog::error("Invalid audio metadata: channels={}, sampleRate={}, bitsPerSample={}", channels, sampleRate,
+                      bitsPerSample);
+        free((void*)buffer);
+        return false;
+    }
+    ma_format format = determineFormat(bitsPerSample);
+    if (format == ma_format_unknown) {
+        spdlog::error("Unsupported bits per sample value: {}", bitsPerSample);
+        free((void*)buffer);
+        return false;
+    }
+    if (bufferSize == 0) {
+        free((void*)buffer);
+        return true;
+    }
+
+    auto devices = getDevicesList();
+    if (devices.empty()) {
+        spdlog::error("No playback devices are available");
+        free((void*)buffer);
+        return false;
+    }
+    if (std::find_if(devices.begin(), devices.end(), [&](const DeviceInfo& device) {
+            return ma_device_id_equal(&device.id, &m_selectedDeviceID);
+        }) == devices.end()) {
+        spdlog::warn("Selected audio device is unavailable. Falling back to index 0.");
+        m_selectedDeviceID = devices[0].id;
+    }
+
     freeSounds();
     updateDevice();
-    updateResampler(determineFormat(bitsPerSample), channels, sampleRate, AUDIO_DEFAULT_SAMPLE_RATE);
+    updateResampler(format, channels, sampleRate, AUDIO_DEFAULT_SAMPLE_RATE);
     const ma_uint64 frameCountIn = (bufferSize * 8) / (channels * bitsPerSample);
     ma_uint64 frameCountOut = 0;
     ma_result result =
@@ -70,8 +109,8 @@ bool Audio::playAudioData(const int channels, const int sampleRate, const int bi
         return true;
     }
 
-    ma_audio_buffer_config config = ma_audio_buffer_config_init(determineFormat(bitsPerSample), channels, frameCountOut,
-                                                                pPayload->pcmData.data(), nullptr);
+    ma_audio_buffer_config config =
+        ma_audio_buffer_config_init(format, channels, frameCountOut, pPayload->pcmData.data(), nullptr);
     config.sampleRate = AUDIO_DEFAULT_SAMPLE_RATE;
 
     pPayload->audioBuffer = std::make_unique<ma_audio_buffer>();
