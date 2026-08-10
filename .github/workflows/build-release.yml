@@ -1,9 +1,10 @@
+---
 name: Create Release
 
 on:
   push:
     tags:
-      - "v*" # Triggers the workflow on tags starting with 'v', e.g., v1.0, v2.0-beta
+      - "v*"
 
 permissions:
   contents: write
@@ -31,8 +32,9 @@ jobs:
       - name: Upload x64 binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary-x64 # Explicit artifact name
-          path: build\windows-msvc-x64-release\sim-x64.exe # Explicit file path to upload
+          name: binary-x64
+          path: build\windows-msvc-x64-release\sim-x64.exe
+
 
   build-x86:
     name: Build for Windows (x86)
@@ -56,13 +58,82 @@ jobs:
       - name: Upload x86 binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary-x86 # Explicit artifact name
-          path: build\windows-msvc-x86-release\sim-x86.exe # Explicit file path to upload
+          name: binary-x86
+          path: build\windows-msvc-x86-release\sim-x86.exe
+
+
+  build-x64-debug:
+    name: Build debug symbols for Windows (x64)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC x64 build environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure and build
+        shell: cmd
+        run: scripts\build-debug.bat
+
+      - name: Create debug archive
+        shell: powershell
+        run: |
+          mkdir debug-x64
+          copy build\windows-msvc-x64-debug\sim.exe debug-x64\
+          copy build\windows-msvc-x64-debug\sim.pdb debug-x64\
+          Compress-Archive -Path debug-x64\* -DestinationPath sim-x64-debug-symbols.zip
+
+      - name: Upload x64 debug archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-x64
+          path: sim-x64-debug-symbols.zip
+
+
+  build-x86-debug:
+    name: Build debug symbols for Windows (x86)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC x86 build environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Configure and build
+        shell: cmd
+        run: scripts\build-debug32.bat
+
+      - name: Create debug archive
+        shell: powershell
+        run: |
+          mkdir debug-x86
+          copy build\windows-msvc-x86-debug\sim.exe debug-x86\
+          copy build\windows-msvc-x86-debug\sim.pdb debug-x86\
+          Compress-Archive -Path debug-x86\* -DestinationPath sim-x86-debug-symbols.zip
+
+      - name: Upload x86 debug archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-x86
+          path: sim-x86-debug-symbols.zip
+
 
   create-release:
     name: Create GitHub Release
-    needs: [build-x64, build-x86] # Depends on both successful builds
-    runs-on: ubuntu-latest # ubuntu-latest is sufficient for creating the release
+    needs:
+      - build-x64
+      - build-x86
+      - build-x64-debug
+      - build-x86-debug
+
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -82,6 +153,18 @@ jobs:
           name: binary-x86
           path: release_binaries
 
+      - name: Download x64 debug symbols
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-x64
+          path: release_binaries
+
+      - name: Download x86 debug symbols
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-x86
+          path: release_binaries
+
       - name: Generate CHANGELOG
         run: |
           chmod +x scripts/generate-changelog.sh
@@ -93,6 +176,8 @@ jobs:
           files: |
             release_binaries/sim-x64.exe
             release_binaries/sim-x86.exe
+            release_binaries/sim-x64-debug-symbols.zip
+            release_binaries/sim-x86-debug-symbols.zip
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body_path: CHANGELOG.md
