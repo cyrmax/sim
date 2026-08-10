@@ -15,7 +15,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up MSVC x64 build environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -30,7 +30,7 @@ jobs:
         run: ren build\windows-msvc-x64-release\sim.exe sim-x64.exe
 
       - name: Upload x64 binary as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: binary-x64
           path: build\windows-msvc-x64-release\sim-x64.exe
@@ -41,7 +41,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up MSVC x86 build environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -56,7 +56,7 @@ jobs:
         run: ren build\windows-msvc-x86-release\sim.exe sim-x86.exe
 
       - name: Upload x86 binary as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: binary-x86
           path: build\windows-msvc-x86-release\sim-x86.exe
@@ -136,19 +136,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Create a directory for binaries
         run: mkdir release_binaries
 
       - name: Download x64 binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: binary-x64
           path: release_binaries
 
       - name: Download x86 binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: binary-x86
           path: release_binaries

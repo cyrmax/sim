@@ -1,6 +1,7 @@
 name: Code Quality Check
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -25,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Verify clang-tools installation
         run: |
@@ -35,8 +36,10 @@ jobs:
 
       - name: Check code formatting for compliance
         run: |
+          New-Item -ItemType Directory -Path ci-artifacts -Force | Out-Null
           $files = Get-ChildItem -Path src -Recurse -Include *.cpp,*.h
-          clang-format --dry-run --Werror --style=file $files
+          clang-format --dry-run --Werror --style=file $files 2>&1 | Tee-Object -FilePath ci-artifacts/clang-format.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         shell: pwsh # Use PowerShell for Get-ChildItem
 
       - name: Set up MSVC build environment for the script
@@ -45,6 +48,14 @@ jobs:
           arch: x64
 
       - name: Run clang-tidy
-        shell: cmd
+        shell: pwsh
         run: |
-          scripts\lint.bat
+          cmd /c scripts\lint.bat 2>&1 | Tee-Object -FilePath ci-artifacts/clang-tidy.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload lint artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: code-quality-artifacts-${{ github.run_id }}
+          path: ci-artifacts/
